@@ -12,5 +12,35 @@
     </head>
     <body>
         <canvas id="gameCanvas" width="1400" height="700"></canvas>
+        <script>
+            const canvas = document.getElementById('gameCanvas');
+            const canvas_context = canvas.getContext('2d');
+
+            drawCharacter(0, 0, 'triangle', 'red');
+            drawCharacter(200, 0, 'circle', 'blue');
+            drawCharacter(0, 200, 'circle', 'green');
+            drawCharacter(200, 200, 'triangle', 'yellow');
+            drawCharacter(400, 0, 'square', 'purple');
+
+            function drawCharacter(x, y, shape, color) {
+                canvas_context.fillStyle = color;
+                if (shape === 'triangle') {
+                    canvas_context.beginPath();
+                    canvas_context.moveTo(x + 50, y);
+                    canvas_context.lineTo(x, y + 100);
+                    canvas_context.lineTo(x + 100, y + 100);
+                    canvas_context.lineTo(x + 50, y);
+                    canvas_context.closePath();
+                    canvas_context.fill();
+                }
+                else if (shape === 'circle') {
+                    canvas_context.beginPath();
+                    canvas_context.arc(x + 50, y + 50, 50, 0, Math.PI * 2);
+                    canvas_context.closePath();
+                    canvas_context.fill();
+                }
+                else console.error(`CUSTOM ERROR ALERT — Unknown character shape: ${shape}.`);
+            }
+        </script>
     </body>
 </html>
