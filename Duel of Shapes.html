@@ -16,31 +16,201 @@
             const canvas = document.getElementById('gameCanvas');
             const canvas_context = canvas.getContext('2d');
 
-            drawCharacter(0, 0, 'triangle', 'red');
-            drawCharacter(200, 0, 'circle', 'blue');
-            drawCharacter(0, 200, 'circle', 'green');
-            drawCharacter(200, 200, 'triangle', 'yellow');
-            drawCharacter(400, 0, 'square', 'purple');
+            class Character {
+                #shape;
+                #color;
 
-            function drawCharacter(x, y, shape, color) {
-                canvas_context.fillStyle = color;
-                if (shape === 'triangle') {
-                    canvas_context.beginPath();
-                    canvas_context.moveTo(x + 50, y);
-                    canvas_context.lineTo(x, y + 100);
-                    canvas_context.lineTo(x + 100, y + 100);
-                    canvas_context.lineTo(x + 50, y);
-                    canvas_context.closePath();
-                    canvas_context.fill();
+                constructor(shape, color, position_x, position_y) {
+                    this.#shape = shape;
+                    this.#color = color;
+                    this.position_x = position_x;
+                    this.position_y = position_y;
                 }
-                else if (shape === 'circle') {
-                    canvas_context.beginPath();
-                    canvas_context.arc(x + 50, y + 50, 50, 0, Math.PI * 2);
-                    canvas_context.closePath();
-                    canvas_context.fill();
+
+                getShape() {
+                    return this.#shape;
                 }
-                else console.error(`CUSTOM ERROR ALERT — Unknown character shape: ${shape}.`);
+                getColor() {
+                    return this.#color;
+                }
+
+                draw() {
+                    canvas_context.fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + 50, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + 100);
+                        canvas_context.lineTo(this.position_x + 100, this.position_y + 100);
+                        canvas_context.lineTo(this.position_x + 50, this.position_y);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + 50, this.position_y + 50, 50, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown character shape: ${this.#shape}.`);
+                }
+
+                move(direction) {
+                    //canvas_context.clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
+                    if(direction === 'right') this.position_x += 50;
+                    else if(direction === 'left') this.position_x -= 50;
+                    else if(direction === 'up') this.position_y -= 50;
+                    else if(direction === 'down') this.position_y += 50;
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                    canvas_context.clearRect(0, 0, canvas.width, canvas.height);
+                    this.draw();
+                }
+
+                lesserSummon() {
+                    let summon_color;
+                    if(this.getColor() === 'red') summon_color = '#FF7F7F';
+                    else if(this.getColor() === 'blue') summon_color = '#1E90FF';
+                    else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
+                    new Summon(this.getShape(), summon_color, this.position_x + 125, this.position_y + 25);
+                }
+
+                greaterSummon() {
+                    let summon_color;
+                    if(this.getColor() === 'red') summon_color = '#850101';
+                    else if(this.getColor() === 'blue') summon_color = '#00008B';
+                    else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
+                    new GreaterSummon(this.getShape(), summon_color, this.position_x + 125, this.position_y);
+                }
             }
+
+            class Summon {
+                #shape;
+                #color;
+                #isAlive;
+
+                constructor(shape, color, position_x, position_y) {
+                    this.#shape = shape;
+                    this.#color = color;
+                    this.position_x = position_x;
+                    this.position_y = position_y;
+                    this.#isAlive = true;
+
+                    this.draw();
+                }
+
+                getShape() {
+                    return this.#shape;
+                }
+                getColor() {
+                    return this.#color;
+                }
+                getIsAlive() {
+                    return this.#isAlive;
+                }
+
+                draw() {
+                    canvas_context.fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + 25, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + 50);
+                        canvas_context.lineTo(this.position_x + 50, this.position_y + 50);
+                        canvas_context.lineTo(this.position_x + 25, this.position_y);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + 25, this.position_y + 25, 25, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
+
+                    if(this.getIsAlive() && this.position_x < canvas.width) {
+                        requestAnimationFrame(() => {
+                            this.move('right');
+                        });
+                    }
+                }
+
+                move(direction) {
+                    if(direction === 'right') this.position_x += 10;
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                    canvas_context.clearRect(0, 0, canvas.width, canvas.height);
+                    this.draw();
+                }
+            }
+
+            class GreaterSummon extends Summon {
+                constructor(shape, color, position_x, position_y) {
+                    super(shape, color, position_x, position_y);
+                }
+
+                draw() {
+                    canvas_context.fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + 25, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + 50);
+                        canvas_context.lineTo(this.position_x + 50, this.position_y + 50);
+                        canvas_context.lineTo(this.position_x + 25, this.position_y);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + 25, this.position_y + 50);
+                        canvas_context.lineTo(this.position_x, this.position_y + 100);
+                        canvas_context.lineTo(this.position_x + 50, this.position_y + 100);
+                        canvas_context.lineTo(this.position_x + 25, this.position_y + 50);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + 25, this.position_y + 25, 25, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + 25, this.position_y + 75, 25, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
+
+                    if(this.getIsAlive() && this.position_x < canvas.width) {
+                        requestAnimationFrame(() => {
+                            this.move('right');
+                        });
+                    }
+                }
+            }
+
+            const character1 = new Character('triangle', 'blue', 0, 0);
+
+            character1.draw(0, 0);
+
+            window.addEventListener('keydown', (event) => {
+                if(event.key === 'ArrowRight') {
+                    character1.move('right');
+                }
+                else if(event.key === 'ArrowLeft') {
+                    character1.move('left');
+                }
+                else if(event.key === 'ArrowUp') {
+                    character1.move('up');
+                }
+                else if(event.key === 'ArrowDown') {
+                    character1.move('down');
+                }
+
+                else if(event.key === 'z') {
+                    character1.lesserSummon();
+                }
+                else if(event.key === 'x') {
+                    character1.greaterSummon();
+                }
+            });
         </script>
     </body>
 </html>
