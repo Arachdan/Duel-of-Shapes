@@ -16,15 +16,20 @@
             const canvas = document.getElementById('gameCanvas');
             const canvas_context = canvas.getContext('2d');
 
-            class Character {
+            class Entity {
                 #shape;
                 #color;
+                #width;
+                #height;
+                #step;
 
-                constructor(shape, color, position_x, position_y) {
+                constructor(shape, color, position_x, position_y, width, height) {
                     this.#shape = shape;
                     this.#color = color;
                     this.position_x = position_x;
                     this.position_y = position_y;
+                    this.#width = width;
+                    this.#height = height;
                 }
 
                 getShape() {
@@ -33,36 +38,55 @@
                 getColor() {
                     return this.#color;
                 }
+                getWidth() {
+                    return this.#width;
+                }
+                getHeight() {
+                    return this.#height;
+                }
+                setStep(step) {
+                    this.#step = step;
+                }
+                getStep() {
+                    return this.#step;
+                }
 
                 draw() {
                     canvas_context.fillStyle = this.getColor();
                     if(this.getShape() === 'triangle') {
                         canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + 50, this.position_y);
-                        canvas_context.lineTo(this.position_x, this.position_y + 100);
-                        canvas_context.lineTo(this.position_x + 100, this.position_y + 100);
-                        canvas_context.lineTo(this.position_x + 50, this.position_y);
+                        canvas_context.moveTo(this.position_x + this.#width / 2, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + this.#height);
+                        canvas_context.lineTo(this.position_x + this.#width, this.position_y + this.#height);
+                        canvas_context.lineTo(this.position_x + this.#width / 2, this.position_y);
                         canvas_context.closePath();
                         canvas_context.fill();
                     }
                     else if(this.getShape() === 'circle') {
                         canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + 50, this.position_y + 50, 50, 0, Math.PI * 2);
+                        canvas_context.arc(this.position_x + this.#width / 2, this.position_y + this.#height / 2, Math.min(this.#width, this.#height) / 2, 0, Math.PI * 2);
                         canvas_context.closePath();
                         canvas_context.fill();
                     }
-                    else console.error(`CUSTOM ERROR ALERT — Unknown character shape: ${this.#shape}.`);
+                    else console.error(`CUSTOM ERROR ALERT — Unknown entity shape: ${this.#shape}.`);
                 }
 
                 move(direction) {
                     //canvas_context.clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
-                    if(direction === 'right') this.position_x += 50;
-                    else if(direction === 'left') this.position_x -= 50;
-                    else if(direction === 'up') this.position_y -= 50;
-                    else if(direction === 'down') this.position_y += 50;
+                    if(direction === 'right') this.position_x += this.getStep();
+                    else if(direction === 'left') this.position_x -= this.getStep();
+                    else if(direction === 'up') this.position_y -= this.getStep();
+                    else if(direction === 'down') this.position_y += this.getStep();
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
                     canvas_context.clearRect(0, 0, canvas.width, canvas.height);
                     this.draw();
+                }
+            }
+
+            class Character extends Entity {
+                constructor(shape, color, position_x, position_y, width, height) {
+                    super(shape, color, position_x, position_y, width, height);
+                    this.setStep(100);
                 }
 
                 lesserSummon() {
@@ -70,7 +94,7 @@
                     if(this.getColor() === 'red') summon_color = '#FF7F7F';
                     else if(this.getColor() === 'blue') summon_color = '#1E90FF';
                     else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
-                    new Summon(this.getShape(), summon_color, this.position_x + 125, this.position_y + 25);
+                    new Summon(this.getShape(), summon_color, this.position_x + 125, this.position_y + 25, this.getWidth() / 2, this.getHeight() / 2);
                 }
 
                 greaterSummon() {
@@ -78,55 +102,27 @@
                     if(this.getColor() === 'red') summon_color = '#850101';
                     else if(this.getColor() === 'blue') summon_color = '#00008B';
                     else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
-                    new GreaterSummon(this.getShape(), summon_color, this.position_x + 125, this.position_y);
+                    new GreaterSummon(this.getShape(), summon_color, this.position_x + 125, this.position_y, this.getWidth() / 2, this.getHeight() / 2);
                 }
             }
 
-            class Summon {
-                #shape;
-                #color;
+            class Summon extends Entity {
                 #isAlive;
 
-                constructor(shape, color, position_x, position_y) {
-                    this.#shape = shape;
-                    this.#color = color;
-                    this.position_x = position_x;
-                    this.position_y = position_y;
+                constructor(shape, color, position_x, position_y, width, height) {
+                    super(shape, color, position_x, position_y, width, height);
+                    this.setStep(10);
                     this.#isAlive = true;
-
                     this.draw();
-                }
-
-                getShape() {
-                    return this.#shape;
-                }
-                getColor() {
-                    return this.#color;
                 }
                 getIsAlive() {
                     return this.#isAlive;
                 }
 
                 draw() {
-                    canvas_context.fillStyle = this.getColor();
-                    if(this.getShape() === 'triangle') {
-                        canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + 25, this.position_y);
-                        canvas_context.lineTo(this.position_x, this.position_y + 50);
-                        canvas_context.lineTo(this.position_x + 50, this.position_y + 50);
-                        canvas_context.lineTo(this.position_x + 25, this.position_y);
-                        canvas_context.closePath();
-                        canvas_context.fill();
-                    }
-                    else if(this.getShape() === 'circle') {
-                        canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + 25, this.position_y + 25, 25, 0, Math.PI * 2);
-                        canvas_context.closePath();
-                        canvas_context.fill();
-                    }
-                    else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
+                    super.draw();
 
-                    if(this.getIsAlive() && this.position_x < canvas.width) {
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width / 2) {
                         requestAnimationFrame(() => {
                             this.move('right');
                         });
@@ -134,7 +130,7 @@
                 }
 
                 move(direction) {
-                    if(direction === 'right') this.position_x += 10;
+                    if(direction === 'right') this.position_x += this.getStep();
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
                     canvas_context.clearRect(0, 0, canvas.width, canvas.height);
                     this.draw();
@@ -142,43 +138,43 @@
             }
 
             class GreaterSummon extends Summon {
-                constructor(shape, color, position_x, position_y) {
-                    super(shape, color, position_x, position_y);
+                constructor(shape, color, position_x, position_y, width, height) {
+                    super(shape, color, position_x, position_y, width, height);
                 }
 
                 draw() {
                     canvas_context.fillStyle = this.getColor();
                     if(this.getShape() === 'triangle') {
                         canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + 25, this.position_y);
-                        canvas_context.lineTo(this.position_x, this.position_y + 50);
-                        canvas_context.lineTo(this.position_x + 50, this.position_y + 50);
-                        canvas_context.lineTo(this.position_x + 25, this.position_y);
+                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y);
                         canvas_context.closePath();
                         canvas_context.fill();
 
                         canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + 25, this.position_y + 50);
-                        canvas_context.lineTo(this.position_x, this.position_y + 100);
-                        canvas_context.lineTo(this.position_x + 50, this.position_y + 100);
-                        canvas_context.lineTo(this.position_x + 25, this.position_y + 50);
+                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight() * 2);
+                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight() * 2);
+                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
                         canvas_context.closePath();
                         canvas_context.fill();
                     }
                     else if(this.getShape() === 'circle') {
                         canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + 25, this.position_y + 25, 25, 0, Math.PI * 2);
+                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() / 2, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
                         canvas_context.closePath();
                         canvas_context.fill();
 
                         canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + 25, this.position_y + 75, 25, 0, Math.PI * 2);
+                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() * 1.5, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
                         canvas_context.closePath();
                         canvas_context.fill();
                     }
                     else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
 
-                    if(this.getIsAlive() && this.position_x < canvas.width) {
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width / 2) {
                         requestAnimationFrame(() => {
                             this.move('right');
                         });
@@ -186,7 +182,7 @@
                 }
             }
 
-            const character1 = new Character('triangle', 'blue', 0, 0);
+            const character1 = new Character('circle', 'blue', 0, 0, 100, 100);
 
             character1.draw(0, 0);
 
