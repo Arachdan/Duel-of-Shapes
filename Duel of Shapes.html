@@ -3,8 +3,276 @@
     <head>
         <meta charset="UTF-8">
         <title>Duel of Shapes</title>
+        <style>
+            #gameCanvas {
+                border: 1px solid black;
+                background-color: aqua
+            }
+        </style>
     </head>
     <body>
-        <p>Hello, World!</p>
+        <canvas id="gameCanvas" width="1400" height="700"></canvas>
+        <script>
+            const canvas = document.getElementById('gameCanvas');
+            const canvas_context = canvas.getContext('2d');
+
+            class Entity {
+                #shape;
+                #color;
+                #width;
+                #height;
+                #step;
+                #playerity;
+
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    this.#shape = shape;
+                    this.#color = color;
+                    this.position_x = position_x;
+                    this.position_y = position_y;
+                    this.#width = width;
+                    this.#height = height;
+                    this.#playerity = playerity;
+                }
+
+                getShape() {
+                    return this.#shape;
+                }
+                getColor() {
+                    return this.#color;
+                }
+                getWidth() {
+                    return this.#width;
+                }
+                getHeight() {
+                    return this.#height;
+                }
+                setStep(step) {
+                    this.#step = step;
+                }
+                getStep() {
+                    return this.#step;
+                }
+                getPlayerity() {
+                    return this.#playerity;
+                }
+
+                draw() {
+                    canvas_context.fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + this.#width / 2, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + this.#height);
+                        canvas_context.lineTo(this.position_x + this.#width, this.position_y + this.#height);
+                        canvas_context.lineTo(this.position_x + this.#width / 2, this.position_y);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + this.#width / 2, this.position_y + this.#height / 2, Math.min(this.#width, this.#height) / 2, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown entity shape: ${this.#shape}.`);
+                }
+
+                move(direction) {
+                    //canvas_context.clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
+                    if(direction === 'right') this.position_x += this.getStep();
+                    else if(direction === 'left') this.position_x -= this.getStep();
+                    else if(direction === 'up') this.position_y -= this.getStep();
+                    else if(direction === 'down') this.position_y += this.getStep();
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                    canvas_context.clearRect(this.position_x - this.getStep(), this.position_y - this.getStep(), this.getWidth() + this.getStep() * 2, this.getHeight() + this.getStep() * 2);
+                    this.draw();
+                }
+            }
+
+            class Character extends Entity {
+                summon_x_position;
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    this.setStep(100);
+                }
+
+                updateSummonXPosition() {
+                    switch(this.getPlayerity()) {
+                        case 1:
+                            this.summon_x_position = this.position_x + 125;
+                            break;
+                        case 2:
+                            this.summon_x_position = this.position_x - 75;
+                            break;
+                        default:
+                            console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
+                    }
+                }
+
+                lesserSummon() {
+                    let summon_color;
+                    this.updateSummonXPosition();
+                    if(this.getColor() === 'red') summon_color = '#FF7F7F';
+                    else if(this.getColor() === 'blue') summon_color = '#1E90FF';
+                    else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
+                    new Summon(this.getShape(), summon_color, this.summon_x_position, this.position_y + 25, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity());
+                }
+
+                greaterSummon() {
+                    let summon_color;
+                    this.updateSummonXPosition();
+                    if(this.getColor() === 'red') summon_color = '#850101';
+                    else if(this.getColor() === 'blue') summon_color = '#00008B';
+                    else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
+                    new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.position_y, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity());
+                }
+            }
+
+            class Summon extends Entity {
+                #isAlive;
+                #isGreater;
+                #movementDirection;
+
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    this.setStep(10);
+                    this.#isAlive = true;
+                    this.#isGreater = false;
+                    this.draw();
+                }
+                getIsAlive() {
+                    return this.#isAlive;
+                }
+                getIsGreater() {
+                    return this.#isGreater;
+                }
+                setIsGreater(boolean_val) {
+                    this.#isGreater = boolean_val;
+                }
+                getMovementDirection() {
+                    return this.#movementDirection;
+                }
+                setMovementDirection(direction) {
+                    this.#movementDirection = direction;
+                }
+
+                draw() {
+                    super.draw();
+
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width && this.position_x > 0) {
+                        requestAnimationFrame(() => {
+                            if(this.getPlayerity() === 1) this.move('right');
+                            else if(this.getPlayerity() === 2) this.move('left');
+                            else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
+                        });
+                    }
+                }
+
+                move(direction) {
+                    if(direction === 'right') this.position_x += this.getStep();
+                    else if(direction === 'left') this.position_x -= this.getStep();
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                    if(!this.getIsGreater() && this.getPlayerity() === 1) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight());
+                    else if(!this.getIsGreater() && this.getPlayerity() === 2) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight());
+                    else if(this.getIsGreater() && this.getPlayerity() === 1) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight() * 2);
+                    else if(this.getIsGreater() && this.getPlayerity() === 2) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight() * 2);
+                    else console.error(`CUSTOM ERROR ALERT — Unknown summon type: ${this.getIsGreater()}.`);
+                    this.draw();
+                }
+            }
+
+            class GreaterSummon extends Summon {
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    this.setIsGreater(true);
+                }
+
+                draw() {
+                    canvas_context.fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y);
+                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+
+                        canvas_context.beginPath();
+                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
+                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight() * 2);
+                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight() * 2);
+                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() / 2, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+
+                        canvas_context.beginPath();
+                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() * 1.5, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
+                        canvas_context.closePath();
+                        canvas_context.fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
+
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width && this.position_x > 0) {
+                        requestAnimationFrame(() => {
+                            if(this.getPlayerity() === 1) this.move('right');
+                            else if(this.getPlayerity() === 2) this.move('left');
+                            else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
+                        });
+                    }
+                }
+            }
+
+            const character1 = new Character('circle', 'blue', 0, 0, 100, 100, 1);
+            const character2 = new Character('triangle', 'red', 1300, 600, 100, 100, 2);
+
+            character1.draw(0, 0);
+            character2.draw(1300, 600);
+
+            window.addEventListener('keydown', (event) => {
+                if(event.key === 'd') {
+                    character1.move('right');
+                }
+                else if(event.key === 'a') {
+                    character1.move('left');
+                }
+                else if(event.key === 'w') {
+                    character1.move('up');
+                }
+                else if(event.key === 's') {
+                    character1.move('down');
+                }
+                else if(event.key === 'z') {
+                    character1.lesserSummon();
+                }
+                else if(event.key === 'x') {
+                    character1.greaterSummon();
+                }
+
+                else if(event.key === 'ArrowRight') {
+                    character2.move('right');
+                }
+                else if(event.key === 'ArrowLeft') {
+                    character2.move('left');
+                }
+                else if(event.key === 'ArrowUp') {
+                    character2.move('up');
+                }
+                else if(event.key === 'ArrowDown') {
+                    character2.move('down');
+                }
+                else if(event.key === 'n') {
+                    character2.lesserSummon();
+                }
+                else if(event.key === 'm') {
+                    character2.greaterSummon();
+                }
+            });
+        </script>
     </body>
 </html>
