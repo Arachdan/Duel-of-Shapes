@@ -11,7 +11,7 @@
         </style>
     </head>
     <body>
-        <canvas id="gameCanvas" width="1400" height="700"></canvas>
+        <canvas id="gameCanvas" width="1400" height="800"></canvas>
         <script>
             class Canvas {
                 #width;
@@ -35,8 +35,41 @@
                 getCanvasContext() {
                     return this.#canvas_context;
                 }
+
+                drawGameFields() {
+                    let field_x = character1.getWidth() * 4;
+                    let field_y = 0;
+                    let fields_y_count = this.getHeight() / character1.getHeight() / 2;
+
+                    this.#canvas_context.fillStyle = 'black';
+
+                    // Drawing fields for Player 1
+                    this.#canvas_context.beginPath();
+                    this.#canvas_context.moveTo(field_x, field_y);
+                    this.#canvas_context.lineTo(field_x, this.getHeight());
+                    for(let i = 1; i <= fields_y_count; i++) {
+                        if(i === 10) break; // Recursion guardian
+                        this.#canvas_context.moveTo(0, character1.getHeight() * 2 * i);
+                        this.#canvas_context.lineTo(character1.getWidth() * 4, character1.getHeight() * 2 * i);
+                    }
+                    this.#canvas_context.stroke();
+                    this.#canvas_context.closePath()
+
+                    // Drawing fields for Player 2
+                    field_x = this.getWidth() - character2.getWidth() * 4;
+
+                    this.#canvas_context.beginPath();
+                    this.#canvas_context.moveTo(field_x, field_y);
+                    this.#canvas_context.lineTo(field_x, this.getHeight());
+                    for(let i = 1; i <= fields_y_count; i++) {
+                        if(i === 10) break;
+                        this.#canvas_context.moveTo(field_x, character2.getHeight() * 2 * i);
+                        this.#canvas_context.lineTo(field_x + character2.getWidth() * 4, character2.getHeight() * 2 * i);
+                    }
+                    this.#canvas_context.stroke();
+                    this.#canvas_context.closePath()
+                }
             }
-            const canvas = new Canvas(document.getElementById('gameCanvas'));
 
             class Entity {
                 #shape;
@@ -114,7 +147,9 @@
                 summon_x_position;
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
-                    this.setStep(100);
+                    this.setStep(
+                        this.getHeight() * 2
+                    );
                 }
 
                 updateSummonXPosition() {
@@ -250,8 +285,11 @@
                 }
             }
 
-            const character1 = new Character('circle', 'blue', 0, 0, 100, 100, 1);
-            const character2 = new Character('triangle', 'red', 1300, 600, 100, 100, 2);
+            const character1 = new Character('circle', 'blue', 50, 50, 100, 100, 1);
+            const character2 = new Character('triangle', 'red', 1250, 650, 100, 100, 2);
+
+            const canvas = new Canvas(document.getElementById('gameCanvas'));
+            canvas.drawGameFields();
 
             character1.draw(0, 0);
             character2.draw(1300, 600);
