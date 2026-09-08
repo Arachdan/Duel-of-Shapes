@@ -13,8 +13,30 @@
     <body>
         <canvas id="gameCanvas" width="1400" height="700"></canvas>
         <script>
-            const canvas = document.getElementById('gameCanvas');
-            const canvas_context = canvas.getContext('2d');
+            class Canvas {
+                #width;
+                #height;
+                #canvas_tag;
+                #canvas_context;
+
+                constructor(canvas_tag) {
+                    this.#canvas_tag = canvas_tag;
+                    this.#canvas_context = canvas_tag.getContext('2d');
+                    this.#width = canvas_tag.width;
+                    this.#height = canvas_tag.height;
+                }
+
+                getWidth() {
+                    return this.#width;
+                }
+                getHeight() {
+                    return this.#height;
+                }
+                getCanvasContext() {
+                    return this.#canvas_context;
+                }
+            }
+            const canvas = new Canvas(document.getElementById('gameCanvas'));
 
             class Entity {
                 #shape;
@@ -57,33 +79,33 @@
                 }
 
                 draw() {
-                    canvas_context.fillStyle = this.getColor();
+                    canvas.getCanvasContext().fillStyle = this.getColor();
                     if(this.getShape() === 'triangle') {
-                        canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + this.#width / 2, this.position_y);
-                        canvas_context.lineTo(this.position_x, this.position_y + this.#height);
-                        canvas_context.lineTo(this.position_x + this.#width, this.position_y + this.#height);
-                        canvas_context.lineTo(this.position_x + this.#width / 2, this.position_y);
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().moveTo(this.position_x + this.#width / 2, this.position_y);
+                        canvas.getCanvasContext().lineTo(this.position_x, this.position_y + this.#height);
+                        canvas.getCanvasContext().lineTo(this.position_x + this.#width, this.position_y + this.#height);
+                        canvas.getCanvasContext().lineTo(this.position_x + this.#width / 2, this.position_y);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
                     }
                     else if(this.getShape() === 'circle') {
-                        canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + this.#width / 2, this.position_y + this.#height / 2, Math.min(this.#width, this.#height) / 2, 0, Math.PI * 2);
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().arc(this.position_x + this.#width / 2, this.position_y + this.#height / 2, Math.min(this.#width, this.#height) / 2, 0, Math.PI * 2);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
                     }
                     else console.error(`CUSTOM ERROR ALERT — Unknown entity shape: ${this.#shape}.`);
                 }
 
                 move(direction) {
-                    //canvas_context.clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
+                    //canvas.getCanvasContext().clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
                     if(direction === 'right') this.position_x += this.getStep();
                     else if(direction === 'left') this.position_x -= this.getStep();
                     else if(direction === 'up') this.position_y -= this.getStep();
                     else if(direction === 'down') this.position_y += this.getStep();
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
-                    canvas_context.clearRect(this.position_x - this.getStep(), this.position_y - this.getStep(), this.getWidth() + this.getStep() * 2, this.getHeight() + this.getStep() * 2);
+                    canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y - this.getStep(), this.getWidth() + this.getStep() * 2, this.getHeight() + this.getStep() * 2);
                     this.draw();
                 }
             }
@@ -158,7 +180,7 @@
                 draw() {
                     super.draw();
 
-                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width && this.position_x > 0) {
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.getWidth() && this.position_x > 0) {
                         requestAnimationFrame(() => {
                             if(this.getPlayerity() === 1) this.move('right');
                             else if(this.getPlayerity() === 2) this.move('left');
@@ -171,10 +193,10 @@
                     if(direction === 'right') this.position_x += this.getStep();
                     else if(direction === 'left') this.position_x -= this.getStep();
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
-                    if(!this.getIsGreater() && this.getPlayerity() === 1) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight());
-                    else if(!this.getIsGreater() && this.getPlayerity() === 2) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight());
-                    else if(this.getIsGreater() && this.getPlayerity() === 1) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight() * 2);
-                    else if(this.getIsGreater() && this.getPlayerity() === 2) canvas_context.clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight() * 2);
+                    if(!this.getIsGreater() && this.getPlayerity() === 1) canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight());
+                    else if(!this.getIsGreater() && this.getPlayerity() === 2) canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight());
+                    else if(this.getIsGreater() && this.getPlayerity() === 1) canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth(), this.getHeight() * 2);
+                    else if(this.getIsGreater() && this.getPlayerity() === 2) canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight() * 2);
                     else console.error(`CUSTOM ERROR ALERT — Unknown summon type: ${this.getIsGreater()}.`);
                     this.draw();
                 }
@@ -187,38 +209,38 @@
                 }
 
                 draw() {
-                    canvas_context.fillStyle = this.getColor();
+                    canvas.getCanvasContext().fillStyle = this.getColor();
                     if(this.getShape() === 'triangle') {
-                        canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y);
-                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight());
-                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight());
-                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y);
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().moveTo(this.position_x + this.getWidth() / 2, this.position_y);
+                        canvas.getCanvasContext().lineTo(this.position_x, this.position_y + this.getHeight());
+                        canvas.getCanvasContext().lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight());
+                        canvas.getCanvasContext().lineTo(this.position_x + this.getWidth() / 2, this.position_y);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
 
-                        canvas_context.beginPath();
-                        canvas_context.moveTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
-                        canvas_context.lineTo(this.position_x, this.position_y + this.getHeight() * 2);
-                        canvas_context.lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight() * 2);
-                        canvas_context.lineTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().moveTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
+                        canvas.getCanvasContext().lineTo(this.position_x, this.position_y + this.getHeight() * 2);
+                        canvas.getCanvasContext().lineTo(this.position_x + this.getWidth(), this.position_y + this.getHeight() * 2);
+                        canvas.getCanvasContext().lineTo(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight());
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
                     }
                     else if(this.getShape() === 'circle') {
-                        canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() / 2, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() / 2, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
 
-                        canvas_context.beginPath();
-                        canvas_context.arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() * 1.5, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
-                        canvas_context.closePath();
-                        canvas_context.fill();
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().arc(this.position_x + this.getWidth() / 2, this.position_y + this.getHeight() * 1.5, Math.min(this.getWidth(), this.getHeight()) / 2, 0, Math.PI * 2);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
                     }
                     else console.error(`CUSTOM ERROR ALERT — Unknown summon shape: ${this.getShape()}.`);
 
-                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.width && this.position_x > 0) {
+                    if(this.getIsAlive() && this.position_x + this.getWidth() < canvas.getWidth() && this.position_x > 0) {
                         requestAnimationFrame(() => {
                             if(this.getPlayerity() === 1) this.move('right');
                             else if(this.getPlayerity() === 2) this.move('left');
