@@ -18,6 +18,8 @@
                 #height;
                 #canvas_tag;
                 #canvas_context;
+                #x_limit_point_one;
+                #x_limit_point_two;
 
                 constructor(canvas_tag) {
                     this.#canvas_tag = canvas_tag;
@@ -35,9 +37,22 @@
                 getCanvasContext() {
                     return this.#canvas_context;
                 }
+                setXLimitPointOne(x_coordinate) {
+                    this.#x_limit_point_one = x_coordinate;
+                }
+                getXLimitPointOne() {
+                    return this.#x_limit_point_one;
+                }
+                setXLimitPointTwo(x_coordinate) {
+                    this.#x_limit_point_two = x_coordinate;
+                }
+                getXLimitPointTwo() {
+                    return this.#x_limit_point_two;
+                }
 
                 drawGameFields() {
                     let field_x = character1.getWidth() * 4;
+                    this.setXLimitPointOne(field_x);
                     let field_y = 0;
                     let fields_y_count = this.getHeight() / character1.getHeight() / 2;
 
@@ -52,11 +67,14 @@
                         this.#canvas_context.moveTo(0, character1.getHeight() * 2 * i);
                         this.#canvas_context.lineTo(character1.getWidth() * 4, character1.getHeight() * 2 * i);
                     }
+                    this.#canvas_context.moveTo(field_x / 2, field_y);
+                    this.#canvas_context.lineTo(field_x / 2, this.getHeight());
                     this.#canvas_context.stroke();
                     this.#canvas_context.closePath()
 
                     // Drawing fields for Player 2
                     field_x = this.getWidth() - character2.getWidth() * 4;
+                    this.setXLimitPointTwo(field_x);
 
                     this.#canvas_context.beginPath();
                     this.#canvas_context.moveTo(field_x, field_y);
@@ -66,6 +84,8 @@
                         this.#canvas_context.moveTo(field_x, character2.getHeight() * 2 * i);
                         this.#canvas_context.lineTo(field_x + character2.getWidth() * 4, character2.getHeight() * 2 * i);
                     }
+                    this.#canvas_context.moveTo(field_x + character2.getWidth() * 2, field_y);
+                    this.#canvas_context.lineTo(field_x + character2.getWidth() * 2, this.getHeight());
                     this.#canvas_context.stroke();
                     this.#canvas_context.closePath()
                 }
@@ -77,7 +97,7 @@
                 #width;
                 #height;
                 #step;
-                #playerity;
+                #playerity;  
 
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     this.#shape = shape;
@@ -133,10 +153,26 @@
 
                 move(direction) {
                     canvas.getCanvasContext().clearRect(this.position_x, this.position_y, this.getWidth(), this.getHeight());
-                    if(direction === 'right') this.position_x += this.getStep();
-                    else if(direction === 'left') this.position_x -= this.getStep();
-                    else if(direction === 'up') this.position_y -= this.getStep();
-                    else if(direction === 'down') this.position_y += this.getStep();
+                    if(direction === 'right') {
+                        if(
+                            this.position_x + this.getStep() <= canvas.getWidth() &&
+                            (this.position_x + this.getStep() < canvas.getXLimitPointTwo() && this.position_x + this.getStep() < canvas.getXLimitPointOne()
+                            || this.position_x + this.getStep() > canvas.getXLimitPointTwo() && this.position_x + this.getStep() > canvas.getXLimitPointOne())
+                        ) this.position_x += this.getStep();
+                    }
+                    else if(direction === 'left') {
+                        if(
+                            this.position_x - this.getStep() >= 0 &&
+                            (this.position_x - this.getStep() > canvas.getXLimitPointTwo() && this.position_x - this.getStep() > canvas.getXLimitPointOne()
+                            || this.position_x - this.getStep() < canvas.getXLimitPointTwo() && this.position_x - this.getStep() < canvas.getXLimitPointOne())
+                        ) this.position_x -= this.getStep();
+                    }
+                    else if(direction === 'up') {
+                        if(this.position_y - this.getStep() >= 0) this.position_y -= this.getStep();
+                    }
+                    else if(direction === 'down') {
+                        if(this.position_y + this.getStep() <= canvas.getHeight()) this.position_y += this.getStep();
+                    }
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
                     this.draw();
                 }
