@@ -132,13 +132,12 @@
                 }
 
                 move(direction) {
-                    //canvas.getCanvasContext().clearRect(this.position_x, this.position_y, 100, 100); (AI's suggestion.)
+                    canvas.getCanvasContext().clearRect(this.position_x, this.position_y, this.getWidth(), this.getHeight());
                     if(direction === 'right') this.position_x += this.getStep();
                     else if(direction === 'left') this.position_x -= this.getStep();
                     else if(direction === 'up') this.position_y -= this.getStep();
                     else if(direction === 'down') this.position_y += this.getStep();
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
-                    canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y - this.getStep(), this.getWidth() + this.getStep() * 2, this.getHeight() + this.getStep() * 2);
                     this.draw();
                 }
             }
@@ -234,6 +233,7 @@
                     else if(this.getIsGreater() && this.getPlayerity() === 2) canvas.getCanvasContext().clearRect(this.position_x - this.getStep(), this.position_y, this.getWidth() + this.getStep() * 2, this.getHeight() * 2);
                     else console.error(`CUSTOM ERROR ALERT — Unknown summon type: ${this.getIsGreater()}.`);
                     this.draw();
+                    canvas.drawGameFields();
                 }
             }
 
