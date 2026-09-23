@@ -34,7 +34,11 @@
                     canvas.drawGameFields();
 
                     for(let i = 0; i < summons.length; i++) {
-                        if(summons[i].getPositionX() + summons[i].getWidth() < canvas.getWidth() && summons[i].getPositionX() > 0) summons[i].draw();
+                        /*
+                            The usage of summons[i].getStep() below is to ensure summon's collision
+                            with a wall is somewhat pleasing to the eye (and more realistic-looking).
+                        */
+                        if(summons[i].getPositionX() + summons[i].getWidth() - summons[i].getStep() < canvas.getWidth() && summons[i].getPositionX() + summons[i].getStep() > 0) summons[i].draw();
                         else {
                             summons.splice(i, 1);
                             i--; // To not skip the summon that shifts into the removed summon's position in the array.
@@ -60,6 +64,8 @@
                                 (summons[j].getPositionY() > summons[i].getPositionY() + summons[i].getHeight())
                                 ||
                                 (summons[i].getPositionY() > summons[j].getPositionY() + summons[j].getHeight())
+                                ||
+                                (summons[i].getPlayerity() === summons[j].getPlayerity())
                             ) continue;
                             // Actions to execute when in collision
                             else {
@@ -294,7 +300,7 @@
                     else if(this.getColor() === 'blue') summon_color = '#00008B';
                     else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
                     summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
-                    summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
                 }
             }
 
@@ -337,6 +343,7 @@
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setIsGreater(true); // Remove isGreater altogether if this class won't be used.
+                    if(this.getShape() === 'circle') this.setStep(25);
                 }
             }
 
