@@ -14,6 +14,7 @@
         <canvas id="gameCanvas" width="1400" height="800"></canvas>
         <script>
             const summons = [];
+            const players = [];
 
             class GameMaster {
                 loop() {
@@ -25,8 +26,8 @@
                     }
                     /* Update Entities' coordinates — END */
 
-                    this.checkSummonsCollision();
-
+                    this.checkCollision(summons);
+                    this.checkCollision(players);
 
                     canvas.clear();
 
@@ -52,24 +53,55 @@
                     requestAnimationFrame(() => this.loop());
                 }
 
-                checkSummonsCollision() {
-                    for(let i = 0; i < summons.length; i++) {
-                        for(let j = i + 1; j < summons.length; j++) {
-                            // Checking for "NOT in collision" state
+                checkCollision(entity) {
+                    function getAlphaValue(player) {
+                        const color = player.getColor();
+                        const arrayed_color = color.match(/[\d.]+/g);
+                        return arrayed_color[3]; // The array goes like "R value, G value, B value, A value".
+                    }
+                    for(let i = summons.length - 1; i >= 0; i--) {
+                        for(let j = 0; j < entity.length; j++) {
+                            if(entity === summons && j > i) continue; // Excludes self-collision case.
+
+                            let gap_radius = 0;
+                            if(entity === players) {
+                                if(entity[j].getShape() === 'circle') gap_radius = 15;
+                                else if(entity[j].getShape() === 'triangle') gap_radius = 30;
+                            }
+
+                            // Checking for "NOT in collision" state.
                             if(
-                                (summons[j].getPositionX() > summons[i].getPositionX() + summons[i].getWidth())
+                                (entity[j].getPositionX() > summons[i].getPositionX() + summons[i].getWidth() - gap_radius)
                                 ||
-                                (summons[i].getPositionX() > summons[j].getPositionX() + summons[j].getWidth())
+                                (summons[i].getPositionX() > entity[j].getPositionX() + entity[j].getWidth() - gap_radius)
                                 ||
-                                (summons[j].getPositionY() > summons[i].getPositionY() + summons[i].getHeight())
+                                (entity[j].getPositionY() > summons[i].getPositionY() + summons[i].getHeight())
                                 ||
-                                (summons[i].getPositionY() > summons[j].getPositionY() + summons[j].getHeight())
+                                (summons[i].getPositionY() > entity[j].getPositionY() + entity[j].getHeight())
                                 ||
-                                (summons[i].getPlayerity() === summons[j].getPlayerity())
+                                (entity === summons && summons[i].getPlayerity() === entity[j].getPlayerity())
                             ) continue;
-                            // Actions to execute when in collision
+                            // Actions to execute when in collision.
                             else {
-                                summons[i].setStep(1);
+                                if(entity === summons) summons[j].setStep(1); // Affects first-summoned entity, on a 0-1 array.
+                                else if(entity === players) {
+                                    if(players[j].getPlayerity() === 1 && getAlphaValue(players[j]) >= 0 && getAlphaValue(players[j]) <= 1) {
+                                        const new_alpha = getAlphaValue(players[j]) - 0.2;
+                                        players[j].setColor(`rgb(0, 0, 255, ${new_alpha})`); // Semi-transparent blue.
+                                    }
+                                    // Two last conditions in the below if-statement safeguard from the character reappearing after being killed and shot again.
+                                    else if(players[j].getPlayerity() === 2 && getAlphaValue(players[j]) >= 0 && getAlphaValue(players[j]) <= 1) {
+                                        const new_alpha = getAlphaValue(players[j]) - 0.2;
+                                        players[j].setColor(`rgb(255, 0, 0, ${new_alpha})`); // Semi-transparent red.
+                                    }
+                                    players[j].setHealth(
+                                        players[j].getHealth() - summons[i].getDamage()
+                                    );
+                                    if(players[j].getHealth() <= 0) alert(`Game over! Player ${players[j].getPlayerity()} has lost!`);
+                                    summons.splice(i, 1);
+                                    break;
+                                }
+                                else console.error(`CUSTOM ERROR ALERT — Unknown entity type: ${entity}.`);
                             }
                         }
                     }
@@ -175,7 +207,9 @@
 
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     this.#shape = shape;
-                    this.#color = color;
+                    if(color === 'blue') this.#color = 'rgb(0, 0, 255, 1)';
+                    else if(color === 'red') this.#color = 'rgb(255, 0, 0, 1)';
+                    else this.#color = color;
                     this.#position_x = position_x;
                     this.#position_y = position_y;
                     this.#width = width;
@@ -185,6 +219,9 @@
 
                 getShape() {
                     return this.#shape;
+                }
+                setColor(val) {
+                    this.#color = val;
                 }
                 getColor() {
                     return this.#color;
@@ -264,11 +301,20 @@
 
             class Character extends Entity {
                 summon_x_position;
+                #health;
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(
                         this.getHeight() * 2
                     );
+                    this.#health = 100;
+                }
+
+                setHealth(val) {
+                    this.#health = val;
+                }
+                getHealth() {
+                    return this.#health;
                 }
 
                 updateSummonXPosition() {
@@ -287,8 +333,8 @@
                 lesserSummon() {
                     let summon_color;
                     this.updateSummonXPosition();
-                    if(this.getColor() === 'red') summon_color = '#FF7F7F';
-                    else if(this.getColor() === 'blue') summon_color = '#1E90FF';
+                    if(this.getPlayerity() === 2) summon_color = '#FF7F7F'; // Lighter red.
+                    else if(this.getPlayerity() === 1) summon_color = '#1E90FF'; // Lighter blue.
                     else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
                     summons.push(new Summon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
                 }
@@ -296,8 +342,8 @@
                 greaterSummon() {
                     let summon_color;
                     this.updateSummonXPosition();
-                    if(this.getColor() === 'red') summon_color = '#850101';
-                    else if(this.getColor() === 'blue') summon_color = '#00008B';
+                    if(this.getPlayerity() === 2) summon_color = '#850101'; // Darker red.
+                    else if(this.getPlayerity() === 1) summon_color = '#00008B'; // Darker blue
                     else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
                     summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
                     if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
@@ -307,11 +353,13 @@
             class Summon extends Entity {
                 #isGreater;
                 #movementDirection;
+                #damage;
 
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(10);
                     this.#isGreater = false;
+                    this.#damage = 20;
                     this.draw();
                     if(this.getPlayerity() === 1) this.setMovementDirection('right');
                     else if(this.getPlayerity() === 2) this.setMovementDirection('left');
@@ -329,6 +377,9 @@
                 }
                 setMovementDirection(direction) {
                     this.#movementDirection = direction;
+                }
+                getDamage() {
+                    return this.#damage;
                 }
 
                 move(direction) {
@@ -351,6 +402,8 @@
 
             const character1 = new Character('circle', 'blue', 50, 50, 100, 100, 1);
             const character2 = new Character('triangle', 'red', 1250, 650, 100, 100, 2);
+            players.push(character1);
+            players.push(character2);
 
             const canvas = new Canvas(document.getElementById('gameCanvas'));
             canvas.drawGameFields();
