@@ -195,7 +195,7 @@
                                 Solution if needed:
                                 Divide by the same amount of miliseconds as is the value of the players' cooldown.
                             */
-                            let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / 1000; // To get the result in seconds.
+                            let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / player.getSummoningCooldown(); // To get the result in seconds.
                             const new_fields_color = [
                                 getRGBAColorValue('canvas', player_color, 0),
                                 getRGBAColorValue('canvas', player_color, 1),
@@ -371,19 +371,23 @@
             class Character extends Entity {
                 summon_x_position;
                 #health;
-                #summoning_cooldown;
+                #summoning_cooldown_lesser;
+                #summoning_cooldown_greater;
                 #previous_summoning_time;
+                #last_summon;
                 #summons_limit;
                 #summons_already_summoned;
                 #summoning_limit_exceed_cooldown;
                 #summoning_limit_reached_time;
+                
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(
                         this.getHeight() * 2
                     );
                     this.#health = 100;
-                    this.#summoning_cooldown = 1000; // In miliseconds.
+                    this.#summoning_cooldown_lesser = 1000; // In miliseconds.
+                    this.#summoning_cooldown_greater = 3000;
                     /*
                         -Infinity, because minus plus minus gives plus, therefore any performance.now()
                         - "the lowest number possible" gives the highest number possible (it reverses the Infinity).
@@ -393,7 +397,7 @@
                     this.#previous_summoning_time = -Infinity;
                     this.#summons_limit = 10;
                     this.#summons_already_summoned = 0;
-                    this.#summoning_limit_exceed_cooldown = 3000;
+                    this.#summoning_limit_exceed_cooldown = 5000;
                     this.#summoning_limit_reached_time = -Infinity;
                 }
 
@@ -403,14 +407,28 @@
                 getHealth() {
                     return this.#health;
                 }
+                getSummoningCooldownLesser() {
+                    return this.#summoning_cooldown_lesser;
+                }
+                getSummoningCooldownGreater() {
+                    return this.#summoning_cooldown_greater;
+                }
                 getSummoningCooldown() {
-                    return this.#summoning_cooldown;
+                    if(this.getLastSummon() === 'lesser') return this.getSummoningCooldownLesser();
+                    else if(this.getLastSummon() === 'greater') return this.getSummoningCooldownGreater();
+                    else return 0;
                 }
                 setPreviousSummoningTime(val) {
                     this.#previous_summoning_time = val;
                 }
                 getPreviousSummoningTime() {
                     return this.#previous_summoning_time;
+                }
+                setLastSummon(val) {
+                    this.#last_summon = val;
+                }
+                getLastSummon() {
+                    return this.#last_summon;
                 }
                 getSummonsLimit() {
                     return this.#summons_limit;
@@ -435,6 +453,7 @@
                     let cooldown_check = false;
                     let summons_limit_check = false;
 
+                    
                     if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) cooldown_check = true;
 
                     if(this.getSummonsAlreadySummoned() >= this.getSummonsLimit()) {
@@ -468,7 +487,8 @@
                 lesserSummon() {
                     const now = performance.now();
                     if(this.canSummon(now)) {
-                         this.setPreviousSummoningTime(now);
+                        this.setPreviousSummoningTime(now);
+                        this.setLastSummon('lesser');
 
                         let summon_color;
                         this.updateSummonXPosition();
@@ -487,8 +507,10 @@
 
                 greaterSummon() {
                     const now = performance.now();
-                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) {
+                    if(this.canSummon(now)) {
                         this.setPreviousSummoningTime(now);
+                        this.setLastSummon('greater');
+                        
                         let summon_color;
                         this.updateSummonXPosition();
                         if(this.getPlayerity() === 2) summon_color = '#850101'; // Darker red.
@@ -496,6 +518,12 @@
                         else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
                         summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
                         if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    
+                        this.setSummonsAlreadySummoned(
+                            this.getSummonsAlreadySummoned() + 1
+                        );
+
+                        if(this.getSummonsAlreadySummoned() === this.getSummonsLimit()) this.setSummoningLimitReachedTime(now);
                     }
                 }
             }
