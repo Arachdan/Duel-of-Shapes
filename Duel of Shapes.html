@@ -16,6 +16,18 @@
             const summons = [];
             const players = [];
 
+            function getRGBAColorValue(target, specific_target, color_number) {
+                let color;
+                if(target === 'player') color = specific_target.getColor();
+                else if(target === 'canvas') {
+                    if(specific_target === 'blue') color = canvas.getBlueFieldsColor();
+                    else if(specific_target === 'red') color = canvas.getRedFieldsColor();
+                }
+                else console.error(`CUSTOM ERROR ALERT — Unknown target: ${target} (${specific_target}).`);
+                const arrayed_color = color.match(/[\d.]+/g);
+                return arrayed_color[color_number]; // The array goes like "R value, G value, B value, A value".
+            }
+
             class GameMaster {
                 loop() {
                     /* Update Entities' coordinates — START */
@@ -54,11 +66,6 @@
                 }
 
                 checkCollision(entity) {
-                    function getAlphaValue(player) {
-                        const color = player.getColor();
-                        const arrayed_color = color.match(/[\d.]+/g);
-                        return arrayed_color[3]; // The array goes like "R value, G value, B value, A value".
-                    }
                     for(let i = summons.length - 1; i >= 0; i--) {
                         for(let j = 0; j < entity.length; j++) {
                             if(entity === summons && j > i) continue; // Excludes self-collision case.
@@ -89,13 +96,13 @@
                                     );
                                 }
                                 else if(entity === players) {
-                                    if(players[j].getPlayerity() === 1 && getAlphaValue(players[j]) >= 0 && getAlphaValue(players[j]) <= 1) {
-                                        const new_alpha = getAlphaValue(players[j]) - 0.2;
+                                    if(players[j].getPlayerity() === 1 && getRGBAColorValue('player', players[j], 3) >= 0 && getRGBAColorValue('player', players[j], 3) <= 1) {
+                                        const new_alpha = getRGBAColorValue('player', players[j], 3) - 0.2;
                                         players[j].setColor(`rgba(0, 0, 255, ${new_alpha})`);
                                     }
                                     // Two last conditions in the below if-statement safeguard from the character reappearing after being killed and shot again.
-                                    else if(players[j].getPlayerity() === 2 && getAlphaValue(players[j]) >= 0 && getAlphaValue(players[j]) <= 1) {
-                                        const new_alpha = getAlphaValue(players[j]) - 0.2;
+                                    else if(players[j].getPlayerity() === 2 && getRGBAColorValue('player', players[j], 3) >= 0 && getRGBAColorValue('player', players[j], 3) <= 1) {
+                                        const new_alpha = getRGBAColorValue('player', players[j], 3) - 0.2;
                                         players[j].setColor(`rgba(255, 0, 0, ${new_alpha})`);
                                     }
                                     players[j].setHealth(
@@ -120,6 +127,8 @@
                 #x_limit_point_one;
                 #x_limit_point_two;
                 #field_height;
+                #blue_fields_color;
+                #red_fields_color;
 
                 constructor(canvas_tag) {
                     this.#canvas_tag = canvas_tag;
@@ -127,6 +136,8 @@
                     this.#width = canvas_tag.width;
                     this.#height = canvas_tag.height;
                     this.#field_height = character1.getHeight() * 2;
+                    this.#blue_fields_color = 'rgba(255, 209, 0, 1)';
+                    this.#red_fields_color = 'rgba(0, 255, 72, 1)';
                 }
 
                 getWidth() {
@@ -153,6 +164,46 @@
                 getFieldHeight() {
                     return this.#field_height;
                 }
+                setBlueFieldsColor(val) {
+                    this.#blue_fields_color = val;
+                }
+                getBlueFieldsColor() {
+                    return this.#blue_fields_color;
+                }
+                setRedFieldsColor(val) {
+                    this.#red_fields_color = val;
+                }
+                getRedFieldsColor() {
+                    return this.#red_fields_color;
+                }
+
+                setUpPlayersFieldsColor(player, player_color) {
+                    const now = performance.now();
+                    if(now - player.getPreviousSummoningTime() < player.getSummoningCooldown()) {
+                        const alpha = getRGBAColorValue('canvas', player_color, 3);
+                        /*
+                            Dividing by 1000 is good for a 1 sec cooldown time; for a longer cooldown
+                            time, I'd have to work on this part of the code, because after 1 sec the alpha
+                            gets to value '1', but the cooldown is still blocking the summoning.
+
+                            Solution if needed:
+                            Divide by the same amount of miliseconds as is the value of the players' cooldown.
+                        */
+                        let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / 1000; // To get the result in seconds.
+                        const new_fields_color = [
+                            getRGBAColorValue('canvas', player_color, 0),
+                            getRGBAColorValue('canvas', player_color, 1),
+                            getRGBAColorValue('canvas', player_color, 2),
+                            remaining_cooldown_time
+                        ];
+                        this.#canvas_context.fillStyle = `rgba(${new_fields_color})`;
+                    }
+                    else {
+                        if(player_color === 'blue') this.#canvas_context.fillStyle = this.getBlueFieldsColor();
+                        else if(player_color === 'red') this.#canvas_context.fillStyle = this.getRedFieldsColor();
+                        else console.error(`CUSTOM ERROR ALERT — Unknown player color: ${player_color}.`);
+                    }
+                }
 
                 drawGameFields() {
                     let field_x = character1.getWidth() * 4;
@@ -160,9 +211,12 @@
                     let field_y = 0;
                     let fields_y_count = this.getHeight() / character1.getHeight() / 2;
 
-                    this.#canvas_context.fillStyle = 'black';
-
                     // Drawing fields for Player 1
+                    this.#canvas_context.rect(0, 0, field_x, this.getHeight());
+                    this.setUpPlayersFieldsColor(character1, 'blue');
+                    this.#canvas_context.fill();
+
+                    this.#canvas_context.strokeStyle = 'black';
                     this.#canvas_context.beginPath();
                     this.#canvas_context.moveTo(field_x, field_y);
                     this.#canvas_context.lineTo(field_x, this.getHeight());
@@ -179,6 +233,10 @@
                     // Drawing fields for Player 2
                     field_x = this.getWidth() - character2.getWidth() * 4;
                     this.setXLimitPointTwo(field_x);
+
+                    this.#canvas_context.rect(field_x, 0, this.getWidth(), this.getHeight());
+                    this.setUpPlayersFieldsColor(character2, 'red');
+                    this.#canvas_context.fill();
 
                     this.#canvas_context.beginPath();
                     this.#canvas_context.moveTo(field_x, field_y);
@@ -306,12 +364,22 @@
             class Character extends Entity {
                 summon_x_position;
                 #health;
+                #summoning_cooldown;
+                #previous_summoning_time;
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(
                         this.getHeight() * 2
                     );
                     this.#health = 100;
+                    this.#summoning_cooldown = 1000; // In miliseconds.
+                    /*
+                        -Infinity, because minus plus minus gives plus, therefore any performance.now()
+                        - "the lowest number possible" gives the highest number possible (it reverses the Infinity).
+                        Thanks to that, the first summoning happens instantly and then is updated according
+                        to the summoning cooldown.
+                    */
+                    this.#previous_summoning_time = -Infinity;
                 }
 
                 setHealth(val) {
@@ -319,6 +387,15 @@
                 }
                 getHealth() {
                     return this.#health;
+                }
+                getSummoningCooldown() {
+                    return this.#summoning_cooldown;
+                }
+                setPreviousSummoningTime(val) {
+                    this.#previous_summoning_time = val;
+                }
+                getPreviousSummoningTime() {
+                    return this.#previous_summoning_time;
                 }
 
                 updateSummonXPosition() {
@@ -335,22 +412,30 @@
                 }
 
                 lesserSummon() {
-                    let summon_color;
-                    this.updateSummonXPosition();
-                    if(this.getPlayerity() === 2) summon_color = '#FF7F7F'; // Lighter red.
-                    else if(this.getPlayerity() === 1) summon_color = '#1E90FF'; // Lighter blue.
-                    else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
-                    summons.push(new Summon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    const now = performance.now();
+                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) {
+                        this.setPreviousSummoningTime(now);
+                        let summon_color;
+                        this.updateSummonXPosition();
+                        if(this.getPlayerity() === 2) summon_color = '#FF7F7F'; // Lighter red.
+                        else if(this.getPlayerity() === 1) summon_color = '#1E90FF'; // Lighter blue.
+                        else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
+                        summons.push(new Summon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    }
                 }
 
                 greaterSummon() {
-                    let summon_color;
-                    this.updateSummonXPosition();
-                    if(this.getPlayerity() === 2) summon_color = '#850101'; // Darker red.
-                    else if(this.getPlayerity() === 1) summon_color = '#00008B'; // Darker blue
-                    else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
-                    summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
-                    if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    const now = performance.now();
+                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) {
+                        this.setPreviousSummoningTime(now);
+                        let summon_color;
+                        this.updateSummonXPosition();
+                        if(this.getPlayerity() === 2) summon_color = '#850101'; // Darker red.
+                        else if(this.getPlayerity() === 1) summon_color = '#00008B'; // Darker blue
+                        else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
+                        summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                        if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    }
                 }
             }
 
