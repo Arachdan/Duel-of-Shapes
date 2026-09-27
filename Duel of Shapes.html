@@ -179,29 +179,36 @@
 
                 setUpPlayersFieldsColor(player, player_color) {
                     const now = performance.now();
-                    if(now - player.getPreviousSummoningTime() < player.getSummoningCooldown()) {
-                        const alpha = getRGBAColorValue('canvas', player_color, 3);
-                        /*
-                            Dividing by 1000 is good for a 1 sec cooldown time; for a longer cooldown
-                            time, I'd have to work on this part of the code, because after 1 sec the alpha
-                            gets to value '1', but the cooldown is still blocking the summoning.
 
-                            Solution if needed:
-                            Divide by the same amount of miliseconds as is the value of the players' cooldown.
-                        */
-                        let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / 1000; // To get the result in seconds.
-                        const new_fields_color = [
-                            getRGBAColorValue('canvas', player_color, 0),
-                            getRGBAColorValue('canvas', player_color, 1),
-                            getRGBAColorValue('canvas', player_color, 2),
-                            remaining_cooldown_time
-                        ];
-                        this.#canvas_context.fillStyle = `rgba(${new_fields_color})`;
+                    if(now - player.getSummoningLimitReachedTime() < player.getSummoningLimitExceedCooldown()){
+                        if(player_color === 'blue') this.#canvas_context.fillStyle = '#292933';
+                        else if(player_color === 'red') this.#canvas_context.fillStyle = '#332929';
                     }
                     else {
-                        if(player_color === 'blue') this.#canvas_context.fillStyle = this.getBlueFieldsColor();
-                        else if(player_color === 'red') this.#canvas_context.fillStyle = this.getRedFieldsColor();
-                        else console.error(`CUSTOM ERROR ALERT — Unknown player color: ${player_color}.`);
+                        if(now - player.getPreviousSummoningTime() < player.getSummoningCooldown()) {
+                            const alpha = getRGBAColorValue('canvas', player_color, 3);
+                            /*
+                                Dividing by 1000 is good for a 1 sec cooldown time; for a longer cooldown
+                                time, I'd have to work on this part of the code, because after 1 sec the alpha
+                                gets to value '1', but the cooldown is still blocking the summoning.
+
+                                Solution if needed:
+                                Divide by the same amount of miliseconds as is the value of the players' cooldown.
+                            */
+                            let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / 1000; // To get the result in seconds.
+                            const new_fields_color = [
+                                getRGBAColorValue('canvas', player_color, 0),
+                                getRGBAColorValue('canvas', player_color, 1),
+                                getRGBAColorValue('canvas', player_color, 2),
+                                remaining_cooldown_time
+                            ];
+                            this.#canvas_context.fillStyle = `rgba(${new_fields_color})`;
+                        }
+                        else {
+                            if(player_color === 'blue') this.#canvas_context.fillStyle = this.getBlueFieldsColor();
+                            else if(player_color === 'red') this.#canvas_context.fillStyle = this.getRedFieldsColor();
+                            else console.error(`CUSTOM ERROR ALERT — Unknown player color: ${player_color}.`);
+                        }
                     }
                 }
 
@@ -366,6 +373,10 @@
                 #health;
                 #summoning_cooldown;
                 #previous_summoning_time;
+                #summons_limit;
+                #summons_already_summoned;
+                #summoning_limit_exceed_cooldown;
+                #summoning_limit_reached_time;
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(
@@ -380,6 +391,10 @@
                         to the summoning cooldown.
                     */
                     this.#previous_summoning_time = -Infinity;
+                    this.#summons_limit = 10;
+                    this.#summons_already_summoned = 0;
+                    this.#summoning_limit_exceed_cooldown = 3000;
+                    this.#summoning_limit_reached_time = -Infinity;
                 }
 
                 setHealth(val) {
@@ -397,6 +412,45 @@
                 getPreviousSummoningTime() {
                     return this.#previous_summoning_time;
                 }
+                getSummonsLimit() {
+                    return this.#summons_limit;
+                }
+                setSummonsAlreadySummoned(val) {
+                    this.#summons_already_summoned = val;
+                }
+                getSummonsAlreadySummoned() {
+                    return this.#summons_already_summoned;
+                }
+                getSummoningLimitExceedCooldown() {
+                    return this.#summoning_limit_exceed_cooldown;
+                }
+                setSummoningLimitReachedTime(val) {
+                    this.#summoning_limit_reached_time = val;
+                }
+                getSummoningLimitReachedTime() {
+                    return this.#summoning_limit_reached_time;
+                }
+
+                canSummon(now) {
+                    let cooldown_check = false;
+                    let summons_limit_check = false;
+
+                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) cooldown_check = true;
+
+                    if(this.getSummonsAlreadySummoned() >= this.getSummonsLimit()) {
+                        if(now - this.getSummoningLimitReachedTime() >= this.getSummoningLimitExceedCooldown()) {
+                            this.setSummonsAlreadySummoned(0);
+                            this.setSummoningLimitReachedTime(-Infinity);
+                            summons_limit_check = true;
+                        }
+                    }
+                    else {
+                        summons_limit_check = true;
+                    }
+
+                    if(cooldown_check && summons_limit_check) return true;
+                    else return false;
+                }
 
                 updateSummonXPosition() {
                     switch(this.getPlayerity()) {
@@ -413,14 +467,21 @@
 
                 lesserSummon() {
                     const now = performance.now();
-                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) {
-                        this.setPreviousSummoningTime(now);
+                    if(this.canSummon(now)) {
+                         this.setPreviousSummoningTime(now);
+
                         let summon_color;
                         this.updateSummonXPosition();
                         if(this.getPlayerity() === 2) summon_color = '#FF7F7F'; // Lighter red.
                         else if(this.getPlayerity() === 1) summon_color = '#1E90FF'; // Lighter blue.
                         else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
                         summons.push(new Summon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                        
+                        this.setSummonsAlreadySummoned(
+                            this.getSummonsAlreadySummoned() + 1
+                        );
+
+                        if(this.getSummonsAlreadySummoned() === this.getSummonsLimit()) this.setSummoningLimitReachedTime(now);
                     }
                 }
 
