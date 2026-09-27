@@ -4,6 +4,9 @@
         <meta charset="UTF-8">
         <title>Duel of Shapes</title>
         <style>
+            body {
+                margin: 0;
+            }
             #gameCanvas {
                 border: 1px solid black;
                 background-color: aqua
@@ -122,6 +125,7 @@
             class Canvas {
                 #width;
                 #height;
+                #game_height;
                 #canvas_tag;
                 #canvas_context;
                 #x_limit_point_one;
@@ -138,6 +142,7 @@
                     this.#field_height = character1.getHeight() * 2;
                     this.#blue_fields_color = 'rgba(255, 209, 0, 1)';
                     this.#red_fields_color = 'rgba(0, 255, 72, 1)';
+                    this.#game_height = Math.floor(this.#height / this.#field_height) * this.#field_height;
                 }
 
                 getWidth() {
@@ -145,6 +150,9 @@
                 }
                 getHeight() {
                     return this.#height;
+                }
+                getGameHeight() {
+                    return this.#game_height;
                 }
                 getCanvasContext() {
                     return this.#canvas_context;
@@ -187,14 +195,6 @@
                     else {
                         if(now - player.getPreviousSummoningTime() < player.getSummoningCooldown()) {
                             const alpha = getRGBAColorValue('canvas', player_color, 3);
-                            /*
-                                Dividing by 1000 is good for a 1 sec cooldown time; for a longer cooldown
-                                time, I'd have to work on this part of the code, because after 1 sec the alpha
-                                gets to value '1', but the cooldown is still blocking the summoning.
-
-                                Solution if needed:
-                                Divide by the same amount of miliseconds as is the value of the players' cooldown.
-                            */
                             let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / player.getSummoningCooldown(); // To get the result in seconds.
                             const new_fields_color = [
                                 getRGBAColorValue('canvas', player_color, 0),
@@ -216,24 +216,24 @@
                     let field_x = character1.getWidth() * 4;
                     this.setXLimitPointOne(field_x);
                     let field_y = 0;
-                    let fields_y_count = this.getHeight() / character1.getHeight() / 2;
+                    let fields_y_count = this.getGameHeight() / character1.getHeight() / 2;
 
                     // Drawing fields for Player 1
-                    this.#canvas_context.rect(0, 0, field_x, this.getHeight());
+                    this.#canvas_context.rect(0, 0, field_x, this.getGameHeight());
                     this.setUpPlayersFieldsColor(character1, 'blue');
                     this.#canvas_context.fill();
 
                     this.#canvas_context.strokeStyle = 'black';
                     this.#canvas_context.beginPath();
                     this.#canvas_context.moveTo(field_x, field_y);
-                    this.#canvas_context.lineTo(field_x, this.getHeight());
+                    this.#canvas_context.lineTo(field_x, this.getGameHeight());
                     for(let i = 1; i <= fields_y_count; i++) {
                         if(i === 10) break; // Recursion guardian
                         this.#canvas_context.moveTo(0, character1.getHeight() * 2 * i);
                         this.#canvas_context.lineTo(character1.getWidth() * 4, character1.getHeight() * 2 * i);
                     }
                     this.#canvas_context.moveTo(field_x / 2, field_y);
-                    this.#canvas_context.lineTo(field_x / 2, this.getHeight());
+                    this.#canvas_context.lineTo(field_x / 2, this.getGameHeight());
                     this.#canvas_context.stroke();
                     this.#canvas_context.closePath()
 
@@ -241,26 +241,26 @@
                     field_x = this.getWidth() - character2.getWidth() * 4;
                     this.setXLimitPointTwo(field_x);
 
-                    this.#canvas_context.rect(field_x, 0, this.getWidth(), this.getHeight());
+                    this.#canvas_context.rect(field_x, 0, this.getWidth(), this.getGameHeight());
                     this.setUpPlayersFieldsColor(character2, 'red');
                     this.#canvas_context.fill();
 
                     this.#canvas_context.beginPath();
                     this.#canvas_context.moveTo(field_x, field_y);
-                    this.#canvas_context.lineTo(field_x, this.getHeight());
+                    this.#canvas_context.lineTo(field_x, this.getGameHeight());
                     for(let i = 1; i <= fields_y_count; i++) {
                         if(i === 10) break;
                         this.#canvas_context.moveTo(field_x, character2.getHeight() * 2 * i);
                         this.#canvas_context.lineTo(field_x + character2.getWidth() * 4, character2.getHeight() * 2 * i);
                     }
                     this.#canvas_context.moveTo(field_x + character2.getWidth() * 2, field_y);
-                    this.#canvas_context.lineTo(field_x + character2.getWidth() * 2, this.getHeight());
+                    this.#canvas_context.lineTo(field_x + character2.getWidth() * 2, this.getGameHeight());
                     this.#canvas_context.stroke();
                     this.#canvas_context.closePath()
                 }
 
                 clear() {
-                    this.#canvas_context.clearRect(0, 0, this.getWidth(), this.getHeight());
+                    this.#canvas_context.clearRect(0, 0, this.getWidth(), this.getGameHeight());
                 }
             }
 
@@ -529,14 +529,12 @@
             }
 
             class Summon extends Entity {
-                #isGreater;
                 #movementDirection;
                 #damage;
 
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(10);
-                    this.#isGreater = false;
                     this.#damage = 20;
                     this.draw();
                     if(this.getPlayerity() === 1) this.setMovementDirection('right');
@@ -544,12 +542,6 @@
                     else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
                 }
 
-                getIsGreater() {
-                    return this.#isGreater;
-                }
-                setIsGreater(boolean_val) {
-                    this.#isGreater = boolean_val;
-                }
                 getMovementDirection() {
                     return this.#movementDirection;
                 }
@@ -567,11 +559,9 @@
                 }
             }
 
-            // Seems like this won't be useful anymore. Will keep it here until I'm sure that's the case.
             class GreaterSummon extends Summon {
                 constructor(shape, color, position_x, position_y, width, height, playerity) {
                     super(shape, color, position_x, position_y, width, height, playerity);
-                    this.setIsGreater(true); // Remove isGreater altogether if this class won't be used.
                     if(this.getShape() === 'circle') this.setStep(25);
                 }
             }
@@ -583,11 +573,16 @@
             players.push(character1);
             players.push(character2);
 
+            document.getElementById('gameCanvas').width = document.documentElement.scrollWidth;
+            document.getElementById('gameCanvas').height = document.documentElement.scrollHeight;
             const canvas = new Canvas(document.getElementById('gameCanvas'));
             canvas.drawGameFields();
 
-            character1.draw(0, 0);
-            character2.draw(1300, 600);
+            character2.setPositionX(canvas.getWidth() - 150);
+            character2.setPositionY(canvas.getGameHeight() - 150);
+
+            character1.draw();
+            character2.draw();
 
             window.addEventListener('keydown', (event) => {
                 /*
