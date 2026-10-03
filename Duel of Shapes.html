@@ -6,16 +6,376 @@
         <style>
             body {
                 margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: #A7C7E7;
+                color: #0A1829;
+                text-align: center;
             }
             #gameCanvas {
                 border: 1px solid black;
-                background-color: aqua
+                background-color: aqua;
+            }
+            .view {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .btn {
+                border-radius: 10px;
+                padding: 5px;
+                background-color: #E8C6A7;
+                font-size: 20px;
+            }
+            .btn:hover {
+                cursor: pointer;
+                background-color: #E8D8A7;
+            }
+            .horizontal_rule {
+                height: 5px;
+                width: 100%;
+                background-color: #3D5369;
+            }
+            .game_title {
+                background-color: #3D5369;
+                color: #A7C7E7;
+                border-radius: 15px;
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            .game_title:hover {
+                cursor: help;
+            }
+            .welcome_text {
+                font-size: 40px;
+            }
+            .hidden_view {
+                display: none;
+            }
+            .flex_view {
+                display: flex;
+            }
+            .initial_view {
+                display: initial;
+            }
+            .choose_shapes_cards_container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+                margin-bottom: 10px;
+            }
+            .pick_shapes {
+                display: flex;
+                flex-direction: row;
+                gap: 20px;
+            }
+            .card {
+                box-shadow: 2px 2px 5px black;
+            }
+            .pick_triangle {
+                width: 0;
+                height: 0;
+                border-right: 20px solid transparent;
+                border-left: 20px solid transparent;
+                border-top: 10px solid transparent;
+                margin-bottom: 10px;
+                margin-left: 10px;
+            }
+            .pick_triangle_one {
+                border-bottom: 40px solid blue;
+            }
+            .pick_triangle_two {
+                border-bottom: 40px solid red;
+            }
+            .pick_circle {
+                border-radius: 90px;
+                width: 40px;
+                height: 40px;
+                align-self: flex-end;
+                margin-bottom: 10px;
+                margin-right: 10px;
+            }
+            .pick_circle_one {
+                background-color: blue;
+            }
+            .pick_circle_two {
+                background-color: red;
+            }
+            .pick_shape:hover {
+                cursor: pointer;
+                box-shadow: 0px 0px 5px 1px black;
+            }
+            .selected_shape {
+                box-shadow: 0px 0px 5px 1px black;
+                background-color: #3D5369;
+            }
+            .choose_gamefield_cards_container {
+                display: flex;
+                width: 100%;
+                height: 25vh;
+                gap: 20px;
+            }
+            .pick_gamefield {
+                width: 25%;
+                border: 5px ridge black;
+            }
+            .pick_gamefield:hover {
+                cursor: pointer;
+                border-color: #A8A8A8;
+                box-shadow: 2px 2px 4px black;
+            }
+            .selected_gamefield {
+                border-color: #A8A8A8;
+                box-shadow: 2px 2px 4px black;
+                font-weight: bold;
+            }
+            .pick_gamefield_one {
+                background-color: #E5EFE7;
+            }
+            .pick_gamefield_two {
+                background-color: #D6B98C;
+            }
+            .pick_gamefield_three {
+                background-color: #86E3CE;
+            }
+            .pick_gamefield_four {
+                background-color: #B47768;
+            }
+            .gamefield_name {
+                border: inherit;
+                border-width: 3px;
+                margin-top: 0;
+            }
+            .start_game_btn {
+                margin-top: 20px;
+            }
+            .lore_rules_view {
+                flex-direction: column;
+                font-size: 20px;
+                text-align: left;
+            }
+            .go_back_btn {
+                background-color: #695D3D;
+                color: white;
+            }
+            .go_back_btn:hover {
+                color: #0A1829;
+            }
+            .empty_filler {
+                height: 20px;
             }
         </style>
     </head>
     <body>
-        <canvas id="gameCanvas" width="1400" height="800"></canvas>
+        <div class="main_menu_view view">
+            <h1 class="welcome_text">Compete in the <span class="game_title">Duel of Shapes</span>!</h1>
+            <button class="to_set_up_btn btn">Set up the duel</button>
+            <button class="to_lore_and_rules_btn btn">See lore and the dueling rules</button>
+        </div>
+        <div class="set_up_view view hidden_view">
+            <button class="go_back_btn btn">Go back</button>
+            <div class="horizontal_rule"></div>
+            <h1>Choose your shapes</h1>
+            <div class="choose_shapes_cards_container">
+                <div class="choose_shapes_card_one card">
+                    <p>Duelist 1</p>
+                    <div class="pick_shapes">
+                        <div class="pick_triangle pick_triangle_one pick_shape"></div>
+                        <div class="pick_circle pick_circle_one pick_shape"></div>
+                    </div>
+                </div>
+                <div class="choose_shapes_card_two card">
+                    <p>Duelist 2</p>
+                    <div class="pick_shapes">
+                        <div class="pick_triangle pick_triangle_two pick_shape"></div>
+                        <div class="pick_circle pick_circle_two pick_shape"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="horizontal_rule"></div>
+            <div class="choose_gamefield_container">
+                <h1>Choose your Field of Honour</h1>
+                <div class="choose_gamefield_cards_container">
+                    <div class="pick_gamefield pick_gamefield_one">
+                        <p class="gamefield_name">Mistwood</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_two">
+                        <p class="gamefield_name">Sunscar</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_three">
+                        <p class="gamefield_name">Tideglass</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_four">
+                        <p class="gamefield_name">Emberfall</p>
+                    </div>
+                </div>
+            </div>
+            <button class="start_game_btn btn">DUEL!</button>
+        </div>
+        <div class="lore_rules_view hidden_view">
+            <div class="empty_filler"></div>
+            <button class="go_back_btn btn">Go back</button>
+            <div class="empty_filler"></div>
+            <div class="horizontal_rule"></div>
+            <h1>LORE</h1>
+            <p>
+                One day, two shapelings had their own points to prove – thus, they decided upon a duel.
+                <br/>The better shapes summoner wins.
+            </p>
+            <p>
+                Shapelings types:
+                <br/><b>Circleflash</b> – His special summon's ability is speed.
+                <br/><b>Mischief Triangle</b> – Can summon twice as many shapes in a single special attack (unless obstructed).
+            </p>
+            <p>
+                Possible areas to choose as a Field of Honour:
+                <br/><b>Mistwood</b> – A pale, quiet forest shrouded in morning mist.
+                <br/><b>Sunscar</b> – A dry, sun-baked expanse where the earth has turned gold.
+                <br/><b>Tideglass</b> – A strange coastal arena surrounded by bright turquoise waters.
+                <br/><b>Emberfall</b> – A scorched battlefield beneath the fading glow of a dying fire.
+            </p>
+            <div class="horizontal_rule"></div>
+            <h1>RULES</h1>
+            <p>Characters move using WASD and arrow keys. They attack with Z/X and N/M, respectively.</p>
+            <p>
+                Each summon type – lesser and greater – has their own summoning cooldown. On top of that, <br/> after a certain number of summons, a shapeling has to wait a bit of time for their spent mana to replenish.
+            </p>
+            <p>After opposing summons clash, they might get redirected onto nearby paths, push through or get dispelled.</p>
+            <p>The last shapeling standing wins.</p>
+        </div>
+        <canvas id="gameCanvas" class="hidden_view" width="1400" height="800"></canvas>
         <script>
+            let character_1_shape;
+            let character_2_shape;
+            let character_1_fields_color;
+            let character_2_fields_color;
+
+            function setPickGamefieldAfterClickStyle(el_number) {
+                document.getElementsByClassName('pick_gamefield')[el_number].classList.add('selected_gamefield');
+                
+                for(let i = 0; i < document.getElementsByClassName('pick_gamefield').length; i++) {
+                    if(i === el_number) continue;
+                    else {
+                        document.getElementsByClassName('pick_gamefield')[i].classList.remove('selected_gamefield');
+                    }
+                }
+            }
+
+            document.getElementsByClassName('pick_triangle')[0].onclick = () => {
+                character_1_shape = 'triangle';
+                document.getElementsByClassName('pick_triangle')[0].classList.add('selected_shape');
+                document.getElementsByClassName('pick_circle')[0].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_circle')[0].onclick = () => {
+                character_1_shape = 'circle';
+                document.getElementsByClassName('pick_circle')[0].classList.add('selected_shape');
+                document.getElementsByClassName('pick_triangle')[0].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_triangle')[1].onclick = () => {
+                character_2_shape = 'triangle';
+                document.getElementsByClassName('pick_triangle')[1].classList.add('selected_shape');
+                document.getElementsByClassName('pick_circle')[1].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_circle')[1].onclick = () => {
+                character_2_shape = 'circle';
+                document.getElementsByClassName('pick_circle')[1].classList.add('selected_shape');
+                document.getElementsByClassName('pick_triangle')[1].classList.remove('selected_shape');
+            }
+
+            document.getElementsByClassName('pick_gamefield')[0].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[0]).background;
+                character_1_fields_color = 'rgba(112, 78, 38, 1)';
+                character_2_fields_color = 'rgba(78, 155, 94, 1)';
+                setPickGamefieldAfterClickStyle(0);
+            }
+            document.getElementsByClassName('pick_gamefield')[1].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[1]).background;
+                character_1_fields_color = 'rgba(177, 139, 214, 1)';
+                character_2_fields_color = 'rgba(87, 75, 56, 1)';
+                setPickGamefieldAfterClickStyle(1);
+            }
+            document.getElementsByClassName('pick_gamefield')[2].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[2]).background;
+                character_1_fields_color = 'rgba(227, 204, 134, 1)';
+                character_2_fields_color = 'rgba(220, 134, 227, 1)';
+                setPickGamefieldAfterClickStyle(2);
+            }
+            document.getElementsByClassName('pick_gamefield')[3].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[3]).background;
+                character_1_fields_color = 'rgba(105, 180, 181, 1)';
+                character_2_fields_color = 'rgba(105, 181, 130, 1)';
+                setPickGamefieldAfterClickStyle(3);
+            }
+
+            document.getElementsByClassName('to_set_up_btn')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('set_up_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('to_lore_and_rules_btn')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('game_title')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('start_game_btn')[0].onclick = () => {
+                if(
+                    character_1_shape != undefined
+                    && character_2_shape != undefined
+                    && character_1_fields_color != undefined // Only validation for one character is required, technically.
+                ) {
+                    document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                    document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                    document.getElementById('gameCanvas').classList.remove('hidden_view');
+                    document.getElementById('gameCanvas').classList.add('initial_view');
+
+                    // Set up initial canvas size.
+                    document.getElementById('gameCanvas').width = window.innerWidth;
+                    document.getElementById('gameCanvas').height = window.innerHeight;
+
+                    character1 = new Character(character_1_shape, 'blue', 50, 50, 100, 100, 1);
+                    character2 = new Character(character_2_shape, 'red', 1250, 650, 100, 100, 2);
+                    players.push(character1);
+                    players.push(character2);
+
+                    canvas = new Canvas(document.getElementById('gameCanvas'));
+                    canvas.setBlueFieldsColor(character_1_fields_color);
+                    canvas.setRedFieldsColor(character_2_fields_color);
+                    canvas.drawGameFields();
+
+                    // Update actual, playable canvas size of the physical canvas. Uses its virtual size for that.
+                    document.getElementById('gameCanvas').height = canvas.getGameHeight();
+
+                    character2.setPositionX(canvas.getWidth() - 150);
+                    character2.setPositionY(canvas.getGameHeight() - 150);
+
+                    character1.draw();
+                    character2.draw();
+
+                    game_master.loop();
+                }
+            }
+
+            function goBack() {
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('flex_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.remove('initial_view');
+                document.getElementsByClassName('main_menu_view')[0].classList.remove('hidden_view');
+            }
+            document.getElementsByClassName('go_back_btn')[0].onclick = goBack;
+            document.getElementsByClassName('go_back_btn')[1].onclick = goBack;
+
             const summons = [];
             const players = [];
 
@@ -111,7 +471,24 @@
                                     players[j].setHealth(
                                         players[j].getHealth() - summons[i].getDamage()
                                     );
-                                    if(players[j].getHealth() <= 0) alert(`Game over! Player ${players[j].getPlayerity()} has lost!`);
+                                    if(players[j].getHealth() <= 0) {
+                                        setTimeout(
+                                            () => {
+                                                if(character1.getHealth() <= 0) alert('Congratulations! Player 2 has won! Ephemeral renown, glory and all the right to them!');
+                                                else if(character2.getHealth() <= 0) alert('Congratulations! Player 1 has won! Ephemeral renown, glory and all the right to them!');
+                                                else alert('It is a tie!');
+
+                                                // Reset players health.
+                                                character1 = undefined;
+                                                character2 = undefined;
+                                                players.splice(0, 2);
+                                                summons.splice(0, summons.length);
+
+                                                goBack();
+                                            },
+                                            50
+                                        );
+                                    }
                                     summons.splice(i, 1);
                                     break;
                                 }
@@ -286,6 +663,9 @@
                     this.#playerity = playerity;
                 }
 
+                setShape(val) {
+                    this.#shape = val;
+                }
                 getShape() {
                     return this.#shape;
                 }
@@ -362,7 +742,7 @@
                         if(this.getPositionY() - this.getStep() >= 0) this.setPositionY(this.getPositionY() - this.getStep());
                     }
                     else if(direction === 'down') {
-                        if(this.getPositionY() + this.getStep() <= canvas.getHeight()) this.setPositionY(this.getPositionY() + this.getStep());
+                        if(this.getPositionY() + this.getStep() <= canvas.getGameHeight()) this.setPositionY(this.getPositionY() + this.getStep());
                     }
                     else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
                 }
@@ -536,7 +916,6 @@
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(10);
                     this.#damage = 20;
-                    this.draw();
                     if(this.getPlayerity() === 1) this.setMovementDirection('right');
                     else if(this.getPlayerity() === 2) this.setMovementDirection('left');
                     else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
@@ -567,22 +946,6 @@
             }
 
             const game_master = new GameMaster();
-
-            const character1 = new Character('circle', 'blue', 50, 50, 100, 100, 1);
-            const character2 = new Character('triangle', 'red', 1250, 650, 100, 100, 2);
-            players.push(character1);
-            players.push(character2);
-
-            document.getElementById('gameCanvas').width = document.documentElement.scrollWidth;
-            document.getElementById('gameCanvas').height = document.documentElement.scrollHeight;
-            const canvas = new Canvas(document.getElementById('gameCanvas'));
-            canvas.drawGameFields();
-
-            character2.setPositionX(canvas.getWidth() - 150);
-            character2.setPositionY(canvas.getGameHeight() - 150);
-
-            character1.draw();
-            character2.draw();
 
             window.addEventListener('keydown', (event) => {
                 /*
@@ -629,8 +992,6 @@
                     character2.greaterSummon();
                 }
             });
-
-            game_master.loop();
         </script>
     </body>
 </html>
