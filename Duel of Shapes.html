@@ -916,7 +916,6 @@
                     super(shape, color, position_x, position_y, width, height, playerity);
                     this.setStep(10);
                     this.#damage = 20;
-                    this.draw();
                     if(this.getPlayerity() === 1) this.setMovementDirection('right');
                     else if(this.getPlayerity() === 2) this.setMovementDirection('left');
                     else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
