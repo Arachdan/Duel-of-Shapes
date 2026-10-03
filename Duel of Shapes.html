@@ -17,7 +17,6 @@
             #gameCanvas {
                 border: 1px solid black;
                 background-color: aqua;
-                display: none;
             }
             .view {
                 display: flex;
@@ -54,8 +53,14 @@
             .welcome_text {
                 font-size: 40px;
             }
-            .set_up_view {
+            .hidden_view {
                 display: none;
+            }
+            .flex_view {
+                display: flex;
+            }
+            .initial_view {
+                display: initial;
             }
             .choose_shapes_cards_container {
                 display: flex;
@@ -148,6 +153,21 @@
             .start_game_btn {
                 margin-top: 20px;
             }
+            .lore_rules_view {
+                flex-direction: column;
+                font-size: 20px;
+                text-align: left;
+            }
+            .go_back_btn {
+                background-color: #695D3D;
+                color: white;
+            }
+            .go_back_btn:hover {
+                color: #0A1829;
+            }
+            .empty_filler {
+                height: 20px;
+            }
         </style>
     </head>
     <body>
@@ -156,7 +176,9 @@
             <button class="to_set_up_btn btn">Set up the duel</button>
             <button class="to_lore_and_rules_btn btn">See lore and the dueling rules</button>
         </div>
-        <div class="set_up_view view">
+        <div class="set_up_view view hidden_view">
+            <button class="go_back_btn btn">Go back</button>
+            <div class="horizontal_rule"></div>
             <h1>Choose your shapes</h1>
             <div class="choose_shapes_cards_container">
                 <div class="choose_shapes_card_one card">
@@ -194,7 +216,38 @@
             </div>
             <button class="start_game_btn btn">DUEL!</button>
         </div>
-        <canvas id="gameCanvas" width="1400" height="800"></canvas>
+        <div class="lore_rules_view hidden_view">
+            <div class="empty_filler"></div>
+            <button class="go_back_btn btn">Go back</button>
+            <div class="empty_filler"></div>
+            <div class="horizontal_rule"></div>
+            <h1>LORE</h1>
+            <p>
+                One day, two shapelings had their own points to prove – thus, they decided upon a duel.
+                <br/>The better shapes summoner wins.
+            </p>
+            <p>
+                Shapelings types:
+                <br/><b>Circleflash</b> – His special summon's ability is speed.
+                <br/><b>Mischief Triangle</b> – Can summon twice as many shapes in a single special attack (unless obstructed).
+            </p>
+            <p>
+                Possible areas to choose as a Field of Honour:
+                <br/><b>Mistwood</b> – A pale, quiet forest shrouded in morning mist.
+                <br/><b>Sunscar</b> – A dry, sun-baked expanse where the earth has turned gold.
+                <br/><b>Tideglass</b> – A strange coastal arena surrounded by bright turquoise waters.
+                <br/><b>Emberfall</b> – A scorched battlefield beneath the fading glow of a dying fire.
+            </p>
+            <div class="horizontal_rule"></div>
+            <h1>RULES</h1>
+            <p>Characters move using WASD and arrow keys. They attack with Z/X and N/M, respectively.</p>
+            <p>
+                Each summon type – lesser and greater – has their own summoning cooldown. On top of that, <br/> after a certain number of summons, a shapeling has to wait a bit of time for their spent mana to replenish.
+            </p>
+            <p>After opposing summons clash, they might get redirected onto nearby paths, push through or get dispelled.</p>
+            <p>The last shapeling standing wins.</p>
+        </div>
+        <canvas id="gameCanvas" class="hidden_view" width="1400" height="800"></canvas>
         <script>
             let character_1_shape;
             let character_2_shape;
@@ -259,8 +312,19 @@
             }
 
             document.getElementsByClassName('to_set_up_btn')[0].onclick = () => {
-                document.getElementsByClassName('main_menu_view')[0].style.display = 'none';
-                document.getElementsByClassName('set_up_view')[0].style.display = 'flex';
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('set_up_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('to_lore_and_rules_btn')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('game_title')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
             }
             document.getElementsByClassName('start_game_btn')[0].onclick = () => {
                 if(
@@ -268,8 +332,10 @@
                     && character_2_shape != undefined
                     && character_1_fields_color != undefined // Only validation for one character is required, technically.
                 ) {
-                    document.getElementsByClassName('set_up_view')[0].style.display = 'none';
-                    document.getElementById('gameCanvas').style.display = 'initial';
+                    document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                    document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                    document.getElementById('gameCanvas').classList.remove('hidden_view');
+                    document.getElementById('gameCanvas').classList.add('initial_view');
 
                     // Set up initial canvas size.
                     document.getElementById('gameCanvas').width = window.innerWidth;
@@ -297,6 +363,18 @@
                     game_master.loop();
                 }
             }
+
+            function goBack() {
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('flex_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.remove('initial_view');
+                document.getElementsByClassName('main_menu_view')[0].classList.remove('hidden_view');
+            }
+            document.getElementsByClassName('go_back_btn')[0].onclick = goBack;
+            document.getElementsByClassName('go_back_btn')[1].onclick = goBack;
 
             const summons = [];
             const players = [];
@@ -393,8 +471,24 @@
                                     players[j].setHealth(
                                         players[j].getHealth() - summons[i].getDamage()
                                     );
-                                    // Get a different ending screen here. (To change)
-                                    if(players[j].getHealth() <= 0) alert(`Game over! Player ${players[j].getPlayerity()} has lost!`);
+                                    if(players[j].getHealth() <= 0) {
+                                        setTimeout(
+                                            () => {
+                                                if(character1.getHealth() <= 0) alert('Congratulations! Player 2 has won! Ephemeral renown, glory and all the right to them!');
+                                                else if(character2.getHealth() <= 0) alert('Congratulations! Player 1 has won! Ephemeral renown, glory and all the right to them!');
+                                                else alert('It is a tie!');
+
+                                                // Reset players health.
+                                                character1 = undefined;
+                                                character2 = undefined;
+                                                players.splice(0, 2);
+                                                summons.splice(0, summons.length);
+
+                                                goBack();
+                                            },
+                                            50
+                                        );
+                                    }
                                     summons.splice(i, 1);
                                     break;
                                 }
