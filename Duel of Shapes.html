@@ -3,8 +3,995 @@
     <head>
         <meta charset="UTF-8">
         <title>Duel of Shapes</title>
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                background-color: #A7C7E7;
+                color: #0A1829;
+                text-align: center;
+            }
+            #gameCanvas {
+                border: 1px solid black;
+                background-color: aqua;
+            }
+            .view {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .btn {
+                border-radius: 10px;
+                padding: 5px;
+                background-color: #E8C6A7;
+                font-size: 20px;
+            }
+            .btn:hover {
+                cursor: pointer;
+                background-color: #E8D8A7;
+            }
+            .horizontal_rule {
+                height: 5px;
+                width: 100%;
+                background-color: #3D5369;
+            }
+            .game_title {
+                background-color: #3D5369;
+                color: #A7C7E7;
+                border-radius: 15px;
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            .game_title:hover {
+                cursor: help;
+            }
+            .welcome_text {
+                font-size: 40px;
+            }
+            .hidden_view {
+                display: none;
+            }
+            .flex_view {
+                display: flex;
+            }
+            .initial_view {
+                display: initial;
+            }
+            .choose_shapes_cards_container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+                margin-bottom: 10px;
+            }
+            .pick_shapes {
+                display: flex;
+                flex-direction: row;
+                gap: 20px;
+            }
+            .card {
+                box-shadow: 2px 2px 5px black;
+            }
+            .pick_triangle {
+                width: 0;
+                height: 0;
+                border-right: 20px solid transparent;
+                border-left: 20px solid transparent;
+                border-top: 10px solid transparent;
+                margin-bottom: 10px;
+                margin-left: 10px;
+            }
+            .pick_triangle_one {
+                border-bottom: 40px solid blue;
+            }
+            .pick_triangle_two {
+                border-bottom: 40px solid red;
+            }
+            .pick_circle {
+                border-radius: 90px;
+                width: 40px;
+                height: 40px;
+                align-self: flex-end;
+                margin-bottom: 10px;
+                margin-right: 10px;
+            }
+            .pick_circle_one {
+                background-color: blue;
+            }
+            .pick_circle_two {
+                background-color: red;
+            }
+            .pick_shape:hover {
+                cursor: pointer;
+                box-shadow: 0px 0px 5px 1px black;
+            }
+            .selected_shape {
+                box-shadow: 0px 0px 5px 1px black;
+                background-color: #3D5369;
+            }
+            .choose_gamefield_cards_container {
+                display: flex;
+                width: 100%;
+                height: 25vh;
+                gap: 20px;
+            }
+            .pick_gamefield {
+                width: 25%;
+                border: 5px ridge black;
+            }
+            .pick_gamefield:hover {
+                cursor: pointer;
+                border-color: #A8A8A8;
+                box-shadow: 2px 2px 4px black;
+            }
+            .selected_gamefield {
+                border-color: #A8A8A8;
+                box-shadow: 2px 2px 4px black;
+                font-weight: bold;
+            }
+            .pick_gamefield_one {
+                background-color: #E5EFE7;
+            }
+            .pick_gamefield_two {
+                background-color: #D6B98C;
+            }
+            .pick_gamefield_three {
+                background-color: #86E3CE;
+            }
+            .pick_gamefield_four {
+                background-color: #B47768;
+            }
+            .gamefield_name {
+                border: inherit;
+                border-width: 3px;
+                margin-top: 0;
+            }
+            .start_game_btn {
+                margin-top: 20px;
+            }
+            .lore_rules_view {
+                flex-direction: column;
+                font-size: 20px;
+                text-align: left;
+            }
+            .go_back_btn {
+                background-color: #695D3D;
+                color: white;
+            }
+            .go_back_btn:hover {
+                color: #0A1829;
+            }
+            .empty_filler {
+                height: 20px;
+            }
+        </style>
     </head>
     <body>
-        <p>Hello, World!</p>
+        <div class="main_menu_view view">
+            <h1 class="welcome_text">Compete in the <span class="game_title">Duel of Shapes</span>!</h1>
+            <button class="to_set_up_btn btn">Set up the duel</button>
+            <button class="to_lore_and_rules_btn btn">See lore and the dueling rules</button>
+        </div>
+        <div class="set_up_view view hidden_view">
+            <button class="go_back_btn btn">Go back</button>
+            <div class="horizontal_rule"></div>
+            <h1>Choose your shapes</h1>
+            <div class="choose_shapes_cards_container">
+                <div class="choose_shapes_card_one card">
+                    <p>Duelist 1</p>
+                    <div class="pick_shapes">
+                        <div class="pick_triangle pick_triangle_one pick_shape"></div>
+                        <div class="pick_circle pick_circle_one pick_shape"></div>
+                    </div>
+                </div>
+                <div class="choose_shapes_card_two card">
+                    <p>Duelist 2</p>
+                    <div class="pick_shapes">
+                        <div class="pick_triangle pick_triangle_two pick_shape"></div>
+                        <div class="pick_circle pick_circle_two pick_shape"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="horizontal_rule"></div>
+            <div class="choose_gamefield_container">
+                <h1>Choose your Field of Honour</h1>
+                <div class="choose_gamefield_cards_container">
+                    <div class="pick_gamefield pick_gamefield_one">
+                        <p class="gamefield_name">Mistwood</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_two">
+                        <p class="gamefield_name">Sunscar</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_three">
+                        <p class="gamefield_name">Tideglass</p>
+                    </div>
+                    <div class="pick_gamefield pick_gamefield_four">
+                        <p class="gamefield_name">Emberfall</p>
+                    </div>
+                </div>
+            </div>
+            <button class="start_game_btn btn">DUEL!</button>
+        </div>
+        <div class="lore_rules_view hidden_view">
+            <div class="empty_filler"></div>
+            <button class="go_back_btn btn">Go back</button>
+            <div class="empty_filler"></div>
+            <div class="horizontal_rule"></div>
+            <h1>LORE</h1>
+            <p>
+                One day, two shapelings had their own points to prove – thus, they decided upon a duel.
+                <br/>The better shapes summoner wins.
+            </p>
+            <p>
+                Shapelings types:
+                <br/><b>Circleflash</b> – His special summon's ability is speed.
+                <br/><b>Mischief Triangle</b> – Can summon twice as many shapes in a single special attack (unless obstructed).
+            </p>
+            <p>
+                Possible areas to choose as a Field of Honour:
+                <br/><b>Mistwood</b> – A pale, quiet forest shrouded in morning mist.
+                <br/><b>Sunscar</b> – A dry, sun-baked expanse where the earth has turned gold.
+                <br/><b>Tideglass</b> – A strange coastal arena surrounded by bright turquoise waters.
+                <br/><b>Emberfall</b> – A scorched battlefield beneath the fading glow of a dying fire.
+            </p>
+            <div class="horizontal_rule"></div>
+            <h1>RULES</h1>
+            <p>Characters move using WASD and arrow keys. They attack with Z/X and N/M, respectively.</p>
+            <p>
+                Each summon type – lesser and greater – has their own summoning cooldown. On top of that, <br/> after a certain number of summons, a shapeling has to wait a bit of time for their spent mana to replenish.
+            </p>
+            <p>After opposing summons clash, they might get redirected onto nearby paths, push through or get dispelled.</p>
+            <p>The last shapeling standing wins.</p>
+        </div>
+        <canvas id="gameCanvas" class="hidden_view" width="1400" height="800"></canvas>
+        <script>
+            let character_1_shape;
+            let character_2_shape;
+            let character_1_fields_color;
+            let character_2_fields_color;
+
+            function setPickGamefieldAfterClickStyle(el_number) {
+                document.getElementsByClassName('pick_gamefield')[el_number].classList.add('selected_gamefield');
+                
+                for(let i = 0; i < document.getElementsByClassName('pick_gamefield').length; i++) {
+                    if(i === el_number) continue;
+                    else {
+                        document.getElementsByClassName('pick_gamefield')[i].classList.remove('selected_gamefield');
+                    }
+                }
+            }
+
+            document.getElementsByClassName('pick_triangle')[0].onclick = () => {
+                character_1_shape = 'triangle';
+                document.getElementsByClassName('pick_triangle')[0].classList.add('selected_shape');
+                document.getElementsByClassName('pick_circle')[0].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_circle')[0].onclick = () => {
+                character_1_shape = 'circle';
+                document.getElementsByClassName('pick_circle')[0].classList.add('selected_shape');
+                document.getElementsByClassName('pick_triangle')[0].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_triangle')[1].onclick = () => {
+                character_2_shape = 'triangle';
+                document.getElementsByClassName('pick_triangle')[1].classList.add('selected_shape');
+                document.getElementsByClassName('pick_circle')[1].classList.remove('selected_shape');
+            }
+            document.getElementsByClassName('pick_circle')[1].onclick = () => {
+                character_2_shape = 'circle';
+                document.getElementsByClassName('pick_circle')[1].classList.add('selected_shape');
+                document.getElementsByClassName('pick_triangle')[1].classList.remove('selected_shape');
+            }
+
+            document.getElementsByClassName('pick_gamefield')[0].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[0]).background;
+                character_1_fields_color = 'rgba(112, 78, 38, 1)';
+                character_2_fields_color = 'rgba(78, 155, 94, 1)';
+                setPickGamefieldAfterClickStyle(0);
+            }
+            document.getElementsByClassName('pick_gamefield')[1].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[1]).background;
+                character_1_fields_color = 'rgba(177, 139, 214, 1)';
+                character_2_fields_color = 'rgba(87, 75, 56, 1)';
+                setPickGamefieldAfterClickStyle(1);
+            }
+            document.getElementsByClassName('pick_gamefield')[2].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[2]).background;
+                character_1_fields_color = 'rgba(227, 204, 134, 1)';
+                character_2_fields_color = 'rgba(220, 134, 227, 1)';
+                setPickGamefieldAfterClickStyle(2);
+            }
+            document.getElementsByClassName('pick_gamefield')[3].onclick = () => {
+                document.getElementById('gameCanvas').style.background = getComputedStyle(document.getElementsByClassName('pick_gamefield')[3]).background;
+                character_1_fields_color = 'rgba(105, 180, 181, 1)';
+                character_2_fields_color = 'rgba(105, 181, 130, 1)';
+                setPickGamefieldAfterClickStyle(3);
+            }
+
+            document.getElementsByClassName('to_set_up_btn')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('set_up_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('to_lore_and_rules_btn')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('game_title')[0].onclick = () => {
+                document.getElementsByClassName('main_menu_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('hidden_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('flex_view');
+            }
+            document.getElementsByClassName('start_game_btn')[0].onclick = () => {
+                if(
+                    character_1_shape != undefined
+                    && character_2_shape != undefined
+                    && character_1_fields_color != undefined // Only validation for one character is required, technically.
+                ) {
+                    document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                    document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                    document.getElementById('gameCanvas').classList.remove('hidden_view');
+                    document.getElementById('gameCanvas').classList.add('initial_view');
+
+                    // Set up initial canvas size.
+                    document.getElementById('gameCanvas').width = window.innerWidth;
+                    document.getElementById('gameCanvas').height = window.innerHeight;
+
+                    character1 = new Character(character_1_shape, 'blue', 50, 50, 100, 100, 1);
+                    character2 = new Character(character_2_shape, 'red', 1250, 650, 100, 100, 2);
+                    players.push(character1);
+                    players.push(character2);
+
+                    canvas = new Canvas(document.getElementById('gameCanvas'));
+                    canvas.setBlueFieldsColor(character_1_fields_color);
+                    canvas.setRedFieldsColor(character_2_fields_color);
+                    canvas.drawGameFields();
+
+                    // Update actual, playable canvas size of the physical canvas. Uses its virtual size for that.
+                    document.getElementById('gameCanvas').height = canvas.getGameHeight();
+
+                    character2.setPositionX(canvas.getWidth() - 150);
+                    character2.setPositionY(canvas.getGameHeight() - 150);
+
+                    character1.draw();
+                    character2.draw();
+
+                    game_master.loop();
+                }
+            }
+
+            function goBack() {
+                document.getElementsByClassName('lore_rules_view')[0].classList.remove('flex_view')
+                document.getElementsByClassName('set_up_view')[0].classList.remove('flex_view');
+                document.getElementsByClassName('lore_rules_view')[0].classList.add('hidden_view')
+                document.getElementsByClassName('set_up_view')[0].classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.add('hidden_view');
+                document.getElementById('gameCanvas').classList.remove('initial_view');
+                document.getElementsByClassName('main_menu_view')[0].classList.remove('hidden_view');
+            }
+            document.getElementsByClassName('go_back_btn')[0].onclick = goBack;
+            document.getElementsByClassName('go_back_btn')[1].onclick = goBack;
+
+            const summons = [];
+            const players = [];
+
+            function getRGBAColorValue(target, specific_target, color_number) {
+                let color;
+                if(target === 'player') color = specific_target.getColor();
+                else if(target === 'canvas') {
+                    if(specific_target === 'blue') color = canvas.getBlueFieldsColor();
+                    else if(specific_target === 'red') color = canvas.getRedFieldsColor();
+                }
+                else console.error(`CUSTOM ERROR ALERT — Unknown target: ${target} (${specific_target}).`);
+                const arrayed_color = color.match(/[\d.]+/g);
+                return arrayed_color[color_number]; // The array goes like "R value, G value, B value, A value".
+            }
+
+            class GameMaster {
+                loop() {
+                    /* Update Entities' coordinates — START */
+                    for(let i = 0; i < summons.length; i++) {
+                        if(summons[i].getPlayerity() === 1) summons[i].move('right');
+                        else if(summons[i].getPlayerity() === 2) summons[i].move('left');
+                        else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${summons[i].getPlayerity()}.`);
+                    }
+                    /* Update Entities' coordinates — END */
+
+                    canvas.clear();
+
+                    /* Draw Entities – START */
+                    canvas.drawGameFields();
+
+                    for(let i = 0; i < summons.length; i++) {
+                        /*
+                            The usage of summons[i].getStep() below is to ensure summon's collision
+                            with a wall is somewhat pleasing to the eye (and more realistic-looking).
+                        */
+                        if(summons[i].getPositionX() + summons[i].getWidth() - summons[i].getStep() < canvas.getWidth() && summons[i].getPositionX() + summons[i].getStep() > 0) summons[i].draw();
+                        else {
+                            summons.splice(i, 1);
+                            i--; // To not skip the summon that shifts into the removed summon's position in the array.
+                        }
+                    }
+                        
+                    character1.draw();
+                    character2.draw();
+                    /* Draw Entities – END */
+
+                    this.checkCollision(summons);
+                    this.checkCollision(players);
+
+                    requestAnimationFrame(() => this.loop());
+                }
+
+                checkCollision(entity) {
+                    for(let i = summons.length - 1; i >= 0; i--) {
+                        for(let j = 0; j < entity.length; j++) {
+                            if(entity === summons && j > i) continue; // Excludes self-collision case.
+
+                            let gap_radius = 0;
+                            if(entity === players) gap_radius = 15;
+
+                            // Checking for "NOT in collision" state.
+                            if(
+                                (entity[j].getPositionX() > summons[i].getPositionX() + summons[i].getWidth() - gap_radius)
+                                ||
+                                (summons[i].getPositionX() > entity[j].getPositionX() + entity[j].getWidth() - gap_radius)
+                                ||
+                                (entity[j].getPositionY() > summons[i].getPositionY() + summons[i].getHeight())
+                                ||
+                                (summons[i].getPositionY() > entity[j].getPositionY() + entity[j].getHeight())
+                                ||
+                                (entity === summons && summons[i].getPlayerity() === entity[j].getPlayerity())
+                            ) continue;
+                            // Actions to execute when in collision.
+                            else {
+                                if(entity === summons) {
+                                    summons[j].setPositionY(
+                                        summons[j].getPositionY() + canvas.getFieldHeight()
+                                    );
+                                     summons[i].setPositionY(
+                                        summons[i].getPositionY() - canvas.getFieldHeight()
+                                    );
+                                }
+                                else if(entity === players) {
+                                    if(players[j].getPlayerity() === 1 && getRGBAColorValue('player', players[j], 3) >= 0 && getRGBAColorValue('player', players[j], 3) <= 1) {
+                                        const new_alpha = getRGBAColorValue('player', players[j], 3) - 0.2;
+                                        players[j].setColor(`rgba(0, 0, 255, ${new_alpha})`);
+                                    }
+                                    // Two last conditions in the below if-statement safeguard from the character reappearing after being killed and shot again.
+                                    else if(players[j].getPlayerity() === 2 && getRGBAColorValue('player', players[j], 3) >= 0 && getRGBAColorValue('player', players[j], 3) <= 1) {
+                                        const new_alpha = getRGBAColorValue('player', players[j], 3) - 0.2;
+                                        players[j].setColor(`rgba(255, 0, 0, ${new_alpha})`);
+                                    }
+                                    players[j].setHealth(
+                                        players[j].getHealth() - summons[i].getDamage()
+                                    );
+                                    if(players[j].getHealth() <= 0) {
+                                        setTimeout(
+                                            () => {
+                                                if(character1.getHealth() <= 0) alert('Congratulations! Player 2 has won! Ephemeral renown, glory and all the right to them!');
+                                                else if(character2.getHealth() <= 0) alert('Congratulations! Player 1 has won! Ephemeral renown, glory and all the right to them!');
+                                                else alert('It is a tie!');
+
+                                                // Reset players health.
+                                                character1 = undefined;
+                                                character2 = undefined;
+                                                players.splice(0, 2);
+                                                summons.splice(0, summons.length);
+
+                                                goBack();
+                                            },
+                                            50
+                                        );
+                                    }
+                                    summons.splice(i, 1);
+                                    break;
+                                }
+                                else console.error(`CUSTOM ERROR ALERT — Unknown entity type: ${entity}.`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            class Canvas {
+                #width;
+                #height;
+                #game_height;
+                #canvas_tag;
+                #canvas_context;
+                #x_limit_point_one;
+                #x_limit_point_two;
+                #field_height;
+                #blue_fields_color;
+                #red_fields_color;
+
+                constructor(canvas_tag) {
+                    this.#canvas_tag = canvas_tag;
+                    this.#canvas_context = canvas_tag.getContext('2d');
+                    this.#width = canvas_tag.width;
+                    this.#height = canvas_tag.height;
+                    this.#field_height = character1.getHeight() * 2;
+                    this.#blue_fields_color = 'rgba(255, 209, 0, 1)';
+                    this.#red_fields_color = 'rgba(0, 255, 72, 1)';
+                    this.#game_height = Math.floor(this.#height / this.#field_height) * this.#field_height;
+                }
+
+                getWidth() {
+                    return this.#width;
+                }
+                getHeight() {
+                    return this.#height;
+                }
+                getGameHeight() {
+                    return this.#game_height;
+                }
+                getCanvasContext() {
+                    return this.#canvas_context;
+                }
+                setXLimitPointOne(x_coordinate) {
+                    this.#x_limit_point_one = x_coordinate;
+                }
+                getXLimitPointOne() {
+                    return this.#x_limit_point_one;
+                }
+                setXLimitPointTwo(x_coordinate) {
+                    this.#x_limit_point_two = x_coordinate;
+                }
+                getXLimitPointTwo() {
+                    return this.#x_limit_point_two;
+                }
+                getFieldHeight() {
+                    return this.#field_height;
+                }
+                setBlueFieldsColor(val) {
+                    this.#blue_fields_color = val;
+                }
+                getBlueFieldsColor() {
+                    return this.#blue_fields_color;
+                }
+                setRedFieldsColor(val) {
+                    this.#red_fields_color = val;
+                }
+                getRedFieldsColor() {
+                    return this.#red_fields_color;
+                }
+
+                setUpPlayersFieldsColor(player, player_color) {
+                    const now = performance.now();
+
+                    if(now - player.getSummoningLimitReachedTime() < player.getSummoningLimitExceedCooldown()){
+                        if(player_color === 'blue') this.#canvas_context.fillStyle = '#292933';
+                        else if(player_color === 'red') this.#canvas_context.fillStyle = '#332929';
+                    }
+                    else {
+                        if(now - player.getPreviousSummoningTime() < player.getSummoningCooldown()) {
+                            const alpha = getRGBAColorValue('canvas', player_color, 3);
+                            let remaining_cooldown_time = (now - player.getPreviousSummoningTime()) / player.getSummoningCooldown(); // To get the result in seconds.
+                            const new_fields_color = [
+                                getRGBAColorValue('canvas', player_color, 0),
+                                getRGBAColorValue('canvas', player_color, 1),
+                                getRGBAColorValue('canvas', player_color, 2),
+                                remaining_cooldown_time
+                            ];
+                            this.#canvas_context.fillStyle = `rgba(${new_fields_color})`;
+                        }
+                        else {
+                            if(player_color === 'blue') this.#canvas_context.fillStyle = this.getBlueFieldsColor();
+                            else if(player_color === 'red') this.#canvas_context.fillStyle = this.getRedFieldsColor();
+                            else console.error(`CUSTOM ERROR ALERT — Unknown player color: ${player_color}.`);
+                        }
+                    }
+                }
+
+                drawGameFields() {
+                    let field_x = character1.getWidth() * 4;
+                    this.setXLimitPointOne(field_x);
+                    let field_y = 0;
+                    let fields_y_count = this.getGameHeight() / character1.getHeight() / 2;
+
+                    // Drawing fields for Player 1
+                    this.#canvas_context.rect(0, 0, field_x, this.getGameHeight());
+                    this.setUpPlayersFieldsColor(character1, 'blue');
+                    this.#canvas_context.fill();
+
+                    this.#canvas_context.strokeStyle = 'black';
+                    this.#canvas_context.beginPath();
+                    this.#canvas_context.moveTo(field_x, field_y);
+                    this.#canvas_context.lineTo(field_x, this.getGameHeight());
+                    for(let i = 1; i <= fields_y_count; i++) {
+                        if(i === 10) break; // Recursion guardian
+                        this.#canvas_context.moveTo(0, character1.getHeight() * 2 * i);
+                        this.#canvas_context.lineTo(character1.getWidth() * 4, character1.getHeight() * 2 * i);
+                    }
+                    this.#canvas_context.moveTo(field_x / 2, field_y);
+                    this.#canvas_context.lineTo(field_x / 2, this.getGameHeight());
+                    this.#canvas_context.stroke();
+                    this.#canvas_context.closePath()
+
+                    // Drawing fields for Player 2
+                    field_x = this.getWidth() - character2.getWidth() * 4;
+                    this.setXLimitPointTwo(field_x);
+
+                    this.#canvas_context.rect(field_x, 0, this.getWidth(), this.getGameHeight());
+                    this.setUpPlayersFieldsColor(character2, 'red');
+                    this.#canvas_context.fill();
+
+                    this.#canvas_context.beginPath();
+                    this.#canvas_context.moveTo(field_x, field_y);
+                    this.#canvas_context.lineTo(field_x, this.getGameHeight());
+                    for(let i = 1; i <= fields_y_count; i++) {
+                        if(i === 10) break;
+                        this.#canvas_context.moveTo(field_x, character2.getHeight() * 2 * i);
+                        this.#canvas_context.lineTo(field_x + character2.getWidth() * 4, character2.getHeight() * 2 * i);
+                    }
+                    this.#canvas_context.moveTo(field_x + character2.getWidth() * 2, field_y);
+                    this.#canvas_context.lineTo(field_x + character2.getWidth() * 2, this.getGameHeight());
+                    this.#canvas_context.stroke();
+                    this.#canvas_context.closePath()
+                }
+
+                clear() {
+                    this.#canvas_context.clearRect(0, 0, this.getWidth(), this.getGameHeight());
+                }
+            }
+
+            class Entity {
+                #shape;
+                #color;
+                #position_x;
+                #position_y;
+                #width;
+                #height;
+                #step;
+                #playerity;
+
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    this.#shape = shape;
+                    if(color === 'blue') this.#color = 'rgba(0, 0, 255, 1)';
+                    else if(color === 'red') this.#color = 'rgba(255, 0, 0, 1)';
+                    else this.#color = color;
+                    this.#position_x = position_x;
+                    this.#position_y = position_y;
+                    this.#width = width;
+                    this.#height = height;
+                    this.#playerity = playerity;
+                }
+
+                setShape(val) {
+                    this.#shape = val;
+                }
+                getShape() {
+                    return this.#shape;
+                }
+                setColor(val) {
+                    this.#color = val;
+                }
+                getColor() {
+                    return this.#color;
+                }
+                getPositionX() {
+                    return this.#position_x;
+                }
+                setPositionX(val) {
+                    this.#position_x = val;
+                }
+                getPositionY() {
+                    return this.#position_y;
+                }
+                setPositionY(val) {
+                    this.#position_y = val;
+                }
+                getWidth() {
+                    return this.#width;
+                }
+                getHeight() {
+                    return this.#height;
+                }
+                setStep(step) {
+                    this.#step = step;
+                }
+                getStep() {
+                    return this.#step;
+                }
+                getPlayerity() {
+                    return this.#playerity;
+                }
+
+                draw() {
+                    canvas.getCanvasContext().fillStyle = this.getColor();
+                    if(this.getShape() === 'triangle') {
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().moveTo(this.getPositionX() + this.#width / 2, this.getPositionY());
+                        canvas.getCanvasContext().lineTo(this.getPositionX(), this.getPositionY() + this.#height);
+                        canvas.getCanvasContext().lineTo(this.getPositionX() + this.#width, this.getPositionY() + this.#height);
+                        canvas.getCanvasContext().lineTo(this.getPositionX() + this.#width / 2, this.getPositionY());
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
+                    }
+                    else if(this.getShape() === 'circle') {
+                        canvas.getCanvasContext().beginPath();
+                        canvas.getCanvasContext().arc(this.getPositionX() + this.#width / 2, this.getPositionY() + this.#height / 2, Math.min(this.#width, this.#height) / 2, 0, Math.PI * 2);
+                        canvas.getCanvasContext().closePath();
+                        canvas.getCanvasContext().fill();
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown entity shape: ${this.#shape}.`);
+                }
+
+                move(direction) {
+                    if(direction === 'right') {
+                        if(
+                            this.getPositionX() + this.getStep() <= canvas.getWidth() &&
+                            (this.getPositionX() + this.getStep() < canvas.getXLimitPointTwo() && this.getPositionX() + this.getStep() < canvas.getXLimitPointOne()
+                            || this.getPositionX() + this.getStep() > canvas.getXLimitPointTwo() && this.getPositionX() + this.getStep() > canvas.getXLimitPointOne())
+                        ) this.setPositionX(this.getPositionX() + this.getStep());
+                    }
+                    else if(direction === 'left') {
+                        if(
+                            this.getPositionX() - this.getStep() >= 0 &&
+                            (this.getPositionX() - this.getStep() > canvas.getXLimitPointTwo() && this.getPositionX() - this.getStep() > canvas.getXLimitPointOne()
+                            || this.getPositionX() - this.getStep() < canvas.getXLimitPointTwo() && this.getPositionX() - this.getStep() < canvas.getXLimitPointOne())
+                        ) this.setPositionX(this.getPositionX() - this.getStep());
+                    }
+                    else if(direction === 'up') {
+                        if(this.getPositionY() - this.getStep() >= 0) this.setPositionY(this.getPositionY() - this.getStep());
+                    }
+                    else if(direction === 'down') {
+                        if(this.getPositionY() + this.getStep() <= canvas.getGameHeight()) this.setPositionY(this.getPositionY() + this.getStep());
+                    }
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                }
+            }
+
+            class Character extends Entity {
+                summon_x_position;
+                #health;
+                #summoning_cooldown_lesser;
+                #summoning_cooldown_greater;
+                #previous_summoning_time;
+                #last_summon;
+                #summons_limit;
+                #summons_already_summoned;
+                #summoning_limit_exceed_cooldown;
+                #summoning_limit_reached_time;
+                
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    this.setStep(
+                        this.getHeight() * 2
+                    );
+                    this.#health = 100;
+                    this.#summoning_cooldown_lesser = 1000; // In miliseconds.
+                    this.#summoning_cooldown_greater = 3000;
+                    /*
+                        -Infinity, because minus plus minus gives plus, therefore any performance.now()
+                        - "the lowest number possible" gives the highest number possible (it reverses the Infinity).
+                        Thanks to that, the first summoning happens instantly and then is updated according
+                        to the summoning cooldown.
+                    */
+                    this.#previous_summoning_time = -Infinity;
+                    this.#summons_limit = 10;
+                    this.#summons_already_summoned = 0;
+                    this.#summoning_limit_exceed_cooldown = 5000;
+                    this.#summoning_limit_reached_time = -Infinity;
+                }
+
+                setHealth(val) {
+                    this.#health = val;
+                }
+                getHealth() {
+                    return this.#health;
+                }
+                getSummoningCooldownLesser() {
+                    return this.#summoning_cooldown_lesser;
+                }
+                getSummoningCooldownGreater() {
+                    return this.#summoning_cooldown_greater;
+                }
+                getSummoningCooldown() {
+                    if(this.getLastSummon() === 'lesser') return this.getSummoningCooldownLesser();
+                    else if(this.getLastSummon() === 'greater') return this.getSummoningCooldownGreater();
+                    else return 0;
+                }
+                setPreviousSummoningTime(val) {
+                    this.#previous_summoning_time = val;
+                }
+                getPreviousSummoningTime() {
+                    return this.#previous_summoning_time;
+                }
+                setLastSummon(val) {
+                    this.#last_summon = val;
+                }
+                getLastSummon() {
+                    return this.#last_summon;
+                }
+                getSummonsLimit() {
+                    return this.#summons_limit;
+                }
+                setSummonsAlreadySummoned(val) {
+                    this.#summons_already_summoned = val;
+                }
+                getSummonsAlreadySummoned() {
+                    return this.#summons_already_summoned;
+                }
+                getSummoningLimitExceedCooldown() {
+                    return this.#summoning_limit_exceed_cooldown;
+                }
+                setSummoningLimitReachedTime(val) {
+                    this.#summoning_limit_reached_time = val;
+                }
+                getSummoningLimitReachedTime() {
+                    return this.#summoning_limit_reached_time;
+                }
+
+                canSummon(now) {
+                    let cooldown_check = false;
+                    let summons_limit_check = false;
+
+                    
+                    if(now - this.getPreviousSummoningTime() >= this.getSummoningCooldown()) cooldown_check = true;
+
+                    if(this.getSummonsAlreadySummoned() >= this.getSummonsLimit()) {
+                        if(now - this.getSummoningLimitReachedTime() >= this.getSummoningLimitExceedCooldown()) {
+                            this.setSummonsAlreadySummoned(0);
+                            this.setSummoningLimitReachedTime(-Infinity);
+                            summons_limit_check = true;
+                        }
+                    }
+                    else {
+                        summons_limit_check = true;
+                    }
+
+                    if(cooldown_check && summons_limit_check) return true;
+                    else return false;
+                }
+
+                updateSummonXPosition() {
+                    switch(this.getPlayerity()) {
+                        case 1:
+                            this.summon_x_position = this.getPositionX() + 125; // Set this up using variables?
+                            break;
+                        case 2:
+                            this.summon_x_position = this.getPositionX() - 75; // Set this up using variables?
+                            break;
+                        default:
+                            console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
+                    }
+                }
+
+                lesserSummon() {
+                    const now = performance.now();
+                    if(this.canSummon(now)) {
+                        this.setPreviousSummoningTime(now);
+                        this.setLastSummon('lesser');
+
+                        let summon_color;
+                        this.updateSummonXPosition();
+                        if(this.getPlayerity() === 2) summon_color = '#FF7F7F'; // Lighter red.
+                        else if(this.getPlayerity() === 1) summon_color = '#1E90FF'; // Lighter blue.
+                        else console.error(`CUSTOM ERROR ALERT — Unknown lesser summon color: ${this.getColor()}.`);
+                        summons.push(new Summon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                        
+                        this.setSummonsAlreadySummoned(
+                            this.getSummonsAlreadySummoned() + 1
+                        );
+
+                        if(this.getSummonsAlreadySummoned() === this.getSummonsLimit()) this.setSummoningLimitReachedTime(now);
+                    }
+                }
+
+                greaterSummon() {
+                    const now = performance.now();
+                    if(this.canSummon(now)) {
+                        this.setPreviousSummoningTime(now);
+                        this.setLastSummon('greater');
+                        
+                        let summon_color;
+                        this.updateSummonXPosition();
+                        if(this.getPlayerity() === 2) summon_color = '#850101'; // Darker red.
+                        else if(this.getPlayerity() === 1) summon_color = '#00008B'; // Darker blue
+                        else console.error(`CUSTOM ERROR ALERT — Unknown greater summon color: ${this.getColor()}.`);
+                        summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4, this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                        if(this.getShape() === 'triangle') summons.push(new GreaterSummon(this.getShape(), summon_color, this.summon_x_position, this.getPositionY() + this.getHeight() / 4 + canvas.getFieldHeight(), this.getWidth() / 2, this.getHeight() / 2, this.getPlayerity()));
+                    
+                        this.setSummonsAlreadySummoned(
+                            this.getSummonsAlreadySummoned() + 1
+                        );
+
+                        if(this.getSummonsAlreadySummoned() === this.getSummonsLimit()) this.setSummoningLimitReachedTime(now);
+                    }
+                }
+            }
+
+            class Summon extends Entity {
+                #movementDirection;
+                #damage;
+
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    this.setStep(10);
+                    this.#damage = 20;
+                    if(this.getPlayerity() === 1) this.setMovementDirection('right');
+                    else if(this.getPlayerity() === 2) this.setMovementDirection('left');
+                    else console.error(`CUSTOM ERROR ALERT — Unknown playerity: ${this.getPlayerity()}.`);
+                }
+
+                getMovementDirection() {
+                    return this.#movementDirection;
+                }
+                setMovementDirection(direction) {
+                    this.#movementDirection = direction;
+                }
+                getDamage() {
+                    return this.#damage;
+                }
+
+                move(direction) {
+                    if(direction === 'right') this.setPositionX(this.getPositionX() + this.getStep());
+                    else if(direction === 'left') this.setPositionX(this.getPositionX() - this.getStep());
+                    else console.error(`CUSTOM ERROR ALERT — Unknown direction: ${direction}.`);
+                }
+            }
+
+            class GreaterSummon extends Summon {
+                constructor(shape, color, position_x, position_y, width, height, playerity) {
+                    super(shape, color, position_x, position_y, width, height, playerity);
+                    if(this.getShape() === 'circle') this.setStep(25);
+                }
+            }
+
+            const game_master = new GameMaster();
+
+            window.addEventListener('keydown', (event) => {
+                /*
+                    Sets a limit to movement and summoning; each action requires an individual key press.
+                    Main focus with this: limiting player's movement to 1 move per press.
+                */
+                if(event.repeat) return;
+
+                if(event.key === 'd') {
+                    character1.move('right');
+                }
+                else if(event.key === 'a') {
+                    character1.move('left');
+                }
+                else if(event.key === 'w') {
+                    character1.move('up');
+                }
+                else if(event.key === 's') {
+                    character1.move('down');
+                }
+                else if(event.key === 'z') {
+                    character1.lesserSummon();
+                }
+                else if(event.key === 'x') {
+                    character1.greaterSummon();
+                }
+
+                else if(event.key === 'ArrowRight') {
+                    character2.move('right');
+                }
+                else if(event.key === 'ArrowLeft') {
+                    character2.move('left');
+                }
+                else if(event.key === 'ArrowUp') {
+                    character2.move('up');
+                }
+                else if(event.key === 'ArrowDown') {
+                    character2.move('down');
+                }
+                else if(event.key === 'n') {
+                    character2.lesserSummon();
+                }
+                else if(event.key === 'm') {
+                    character2.greaterSummon();
+                }
+            });
+        </script>
     </body>
 </html>
